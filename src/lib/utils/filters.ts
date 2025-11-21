@@ -1,6 +1,6 @@
 // Filter creation and evaluation utilities
 
-import type { FilterCondition, FilterOperator } from '../types';
+import type { FilterCondition, FilterOperator, FilterLogic } from '../types';
 
 /**
  * Evaluate a single filter condition against a row value
@@ -55,11 +55,12 @@ export function evaluateCondition(condition: FilterCondition, rowValue: any): bo
 }
 
 /**
- * Filter data array by multiple conditions (AND logic)
+ * Filter data array by multiple conditions with AND or OR logic
  */
 export function applyFilters<T extends Record<string, any>>(
 	data: T[],
-	conditions: FilterCondition[]
+	conditions: FilterCondition[],
+	logic: FilterLogic = 'and'
 ): T[] {
 	if (conditions.length === 0) return data;
 
@@ -75,11 +76,19 @@ export function applyFilters<T extends Record<string, any>>(
 	if (validConditions.length === 0) return data;
 
 	return data.filter((row) => {
-		// All conditions must pass (AND logic)
-		return validConditions.every((condition) => {
-			const rowValue = row[condition.field];
-			return evaluateCondition(condition, rowValue);
-		});
+		if (logic === 'and') {
+			// All conditions must pass (AND logic)
+			return validConditions.every((condition) => {
+				const rowValue = row[condition.field];
+				return evaluateCondition(condition, rowValue);
+			});
+		} else {
+			// At least one condition must pass (OR logic)
+			return validConditions.some((condition) => {
+				const rowValue = row[condition.field];
+				return evaluateCondition(condition, rowValue);
+			});
+		}
 	});
 }
 

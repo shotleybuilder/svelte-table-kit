@@ -14,6 +14,7 @@ export type {
 	ViewPreset,
 	FilterCondition,
 	FilterOperator,
+	FilterLogic,
 	SortConfig,
 	ClassNameMap,
 	TableFeatures,

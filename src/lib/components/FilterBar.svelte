@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { ColumnDef } from '@tanstack/svelte-table';
-	import type { FilterCondition } from '../types';
+	import type { FilterCondition, FilterLogic } from '../types';
 	import FilterConditionComponent from './FilterCondition.svelte';
 
 	export let columns: ColumnDef<any>[];
 	export let conditions: FilterCondition[] = [];
 	export let onConditionsChange: (conditions: FilterCondition[]) => void;
+	export let logic: FilterLogic = 'and';
+	export let onLogicChange: (logic: FilterLogic) => void;
 
 	// Collapsible state
 	let isExpanded = false;
@@ -88,16 +90,28 @@
 			{#if hasConditions}
 				<div class="filter-conditions">
 					{#each conditions as condition, index (condition.id)}
-						<div class="condition-wrapper">
+						<div class="condition-row">
 							{#if index > 0}
-								<div class="logic-separator">and</div>
+								<select
+									class="logic-select"
+									value={logic}
+									on:change={(e) => {
+										const newLogic = e.currentTarget.value;
+										onLogicChange(newLogic === 'or' ? 'or' : 'and');
+									}}
+								>
+									<option value="and">and</option>
+									<option value="or">or</option>
+								</select>
 							{/if}
-							<FilterConditionComponent
-								{condition}
-								{columns}
-								onUpdate={(updated) => updateCondition(index, updated)}
-								onRemove={() => removeCondition(index)}
-							/>
+							<div class="condition-wrapper">
+								<FilterConditionComponent
+									{condition}
+									{columns}
+									onUpdate={(updated) => updateCondition(index, updated)}
+									onRemove={() => removeCondition(index)}
+								/>
+							</div>
 						</div>
 					{/each}
 				</div>
@@ -218,18 +232,43 @@
 		margin-bottom: 0.75rem;
 	}
 
-	.condition-wrapper {
+	.condition-row {
 		display: flex;
-		flex-direction: column;
+		align-items: flex-start;
 		gap: 0.5rem;
 	}
 
-	.logic-separator {
+	.logic-select {
+		flex-shrink: 0;
+		padding: 0.375rem 0.5rem;
 		font-size: 0.75rem;
 		font-weight: 600;
 		color: #6b7280;
-		text-transform: uppercase;
-		padding-left: 0.5rem;
+		text-transform: lowercase;
+		background: white;
+		border: 1px solid #d1d5db;
+		border-radius: 0.375rem;
+		cursor: pointer;
+		min-width: 60px;
+		height: fit-content;
+		margin-top: 0.5rem;
+	}
+
+	.logic-select:hover {
+		background: #f9fafb;
+		border-color: #9ca3af;
+	}
+
+	.logic-select:focus {
+		outline: none;
+		border-color: #4f46e5;
+		box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+	}
+
+	.condition-wrapper {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.add-condition-btn {

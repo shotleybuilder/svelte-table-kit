@@ -94,6 +94,8 @@ export type FilterOperator =
 	| 'is_before'
 	| 'is_after';
 
+export type FilterLogic = 'and' | 'or';
+
 export interface FilterCondition {
 	id: string;
 	field: string;

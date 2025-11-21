@@ -32,7 +32,7 @@
 		saveColumnOrder,
 		isBrowser
 	} from './stores/persistence';
-	import type { TableKitProps, FilterCondition } from './types';
+	import type { TableKitProps, FilterCondition, FilterLogic } from './types';
 	import { applyFilters } from './utils/filters';
 	import FilterBar from './components/FilterBar.svelte';
 
@@ -76,9 +76,10 @@
 
 	// Custom filter conditions store (our FilterBar component)
 	let filterConditions = writable<FilterCondition[]>([]);
+	let filterLogic = writable<FilterLogic>('and');
 
 	// Apply client-side filtering before passing to TanStack Table
-	$: filteredData = applyFilters(data, $filterConditions);
+	$: filteredData = applyFilters(data, $filterConditions, $filterLogic);
 
 	// Save state to localStorage when it changes
 	$: if (persistState && storageKey && isBrowser) {
@@ -233,6 +234,8 @@
 						{columns}
 						conditions={$filterConditions}
 						onConditionsChange={(newConditions) => filterConditions.set(newConditions)}
+						logic={$filterLogic}
+						onLogicChange={(newLogic) => filterLogic.set(newLogic)}
 					/>
 				</div>
 			{/if}

@@ -20,6 +20,7 @@ export interface TableKitProps<T = any> {
 	// Styling
 	theme?: 'light' | 'dark' | 'auto';
 	classNames?: Partial<ClassNameMap>;
+	align?: 'left' | 'center' | 'right';
 
 	// Callbacks
 	onRowClick?: (row: T) => void;

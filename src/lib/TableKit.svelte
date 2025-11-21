@@ -50,6 +50,7 @@
 	// Optional props with defaults
 	export let storageKey: TableKitProps<T>['storageKey'] = 'table-kit';
 	export let persistState: TableKitProps<T>['persistState'] = true;
+	export let align: TableKitProps<T>['align'] = 'left';
 	export let features: TableKitProps<T>['features'] = {
 		columnVisibility: true,
 		columnResizing: true,
@@ -253,7 +254,14 @@
 	}
 </script>
 
-<div class="table-kit-container">
+<div
+	class="table-kit-container"
+	style="--table-align: {align}; --table-justify: {align === 'left'
+		? 'flex-start'
+		: align === 'right'
+			? 'flex-end'
+			: 'center'};"
+>
 	<!-- Filters and Controls -->
 	{#if features.filtering !== false || features.grouping !== false || features.columnVisibility !== false}
 		<div class="table-kit-toolbar">
@@ -699,7 +707,7 @@
 	th {
 		position: relative;
 		padding: 0.75rem 1.5rem;
-		text-align: left;
+		text-align: var(--table-align, left);
 		font-size: 0.75rem;
 		font-weight: 500;
 		color: #6b7280;
@@ -716,6 +724,7 @@
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
+		justify-content: var(--table-justify, flex-start);
 	}
 
 	.sort-btn {
@@ -780,6 +789,7 @@
 		padding: 1rem 1.5rem;
 		font-size: 0.875rem;
 		color: #111827;
+		text-align: var(--table-align, left);
 	}
 
 	/* Group Rows */

@@ -6,6 +6,7 @@ export { default as TableKit } from './TableKit.svelte';
 // Sub-components
 export { default as FilterBar } from './components/FilterBar.svelte';
 export { default as FilterCondition } from './components/FilterCondition.svelte';
+export { default as GroupBar } from './components/GroupBar.svelte';
 
 // TypeScript types
 export type {

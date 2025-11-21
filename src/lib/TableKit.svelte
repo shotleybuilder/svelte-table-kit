@@ -13,13 +13,17 @@
 		getPaginationRowModel,
 		getSortedRowModel,
 		getFilteredRowModel,
+		getGroupedRowModel,
+		getExpandedRowModel,
 		flexRender,
 		type ColumnDef,
 		type SortingState,
 		type VisibilityState,
 		type ColumnSizingState,
 		type ColumnFiltersState,
-		type ColumnOrderState
+		type ColumnOrderState,
+		type GroupingState,
+		type ExpandedState
 	} from '@tanstack/svelte-table';
 	import {
 		loadColumnVisibility,
@@ -35,6 +39,7 @@
 	import type { TableKitProps, FilterCondition, FilterLogic } from './types';
 	import { applyFilters } from './utils/filters';
 	import FilterBar from './components/FilterBar.svelte';
+	import GroupBar from './components/GroupBar.svelte';
 
 	type T = $$Generic;
 
@@ -78,6 +83,10 @@
 	let filterConditions = writable<FilterCondition[]>([]);
 	let filterLogic = writable<FilterLogic>('and');
 
+	// Grouping state stores
+	let grouping = writable<GroupingState>([]);
+	let expanded = writable<ExpandedState>(true); // Default to expanded
+
 	// Apply client-side filtering before passing to TanStack Table
 	$: filteredData = applyFilters(data, $filterConditions, $filterLogic);
 
@@ -101,12 +110,15 @@
 		columns,
 		columnResizeMode: 'onChange' as const,
 		enableColumnResizing: features.columnResizing !== false,
+		enableGrouping: features.grouping !== false,
 		state: {
 			sorting: $sorting,
 			columnVisibility: $columnVisibility,
 			columnSizing: $columnSizing,
 			columnFilters: $columnFilters,
-			columnOrder: $columnOrder
+			columnOrder: $columnOrder,
+			grouping: $grouping,
+			expanded: $expanded
 		},
 		onSortingChange: (updater: any) => {
 			if (updater instanceof Function) {
@@ -143,9 +155,25 @@
 				columnOrder.set(updater);
 			}
 		},
+		onGroupingChange: (updater: any) => {
+			if (updater instanceof Function) {
+				grouping.update(updater);
+			} else {
+				grouping.set(updater);
+			}
+		},
+		onExpandedChange: (updater: any) => {
+			if (updater instanceof Function) {
+				expanded.update(updater);
+			} else {
+				expanded.set(updater);
+			}
+		},
 		getCoreRowModel: getCoreRowModel(),
 		...(features.sorting !== false && { getSortedRowModel: getSortedRowModel() }),
 		...(features.filtering !== false && { getFilteredRowModel: getFilteredRowModel() }),
+		...(features.grouping !== false && { getGroupedRowModel: getGroupedRowModel() }),
+		...(features.grouping !== false && { getExpandedRowModel: getExpandedRowModel() }),
 		...(features.pagination !== false && { getPaginationRowModel: getPaginationRowModel() })
 	});
 
@@ -158,7 +186,9 @@
 			columnVisibility: $columnVisibility,
 			columnSizing: $columnSizing,
 			columnFilters: $columnFilters,
-			columnOrder: $columnOrder
+			columnOrder: $columnOrder,
+			grouping: $grouping,
+			expanded: $expanded
 		}
 	}));
 
@@ -225,7 +255,7 @@
 
 <div class="table-kit-container">
 	<!-- Filters and Controls -->
-	{#if features.filtering !== false || features.columnVisibility !== false}
+	{#if features.filtering !== false || features.grouping !== false || features.columnVisibility !== false}
 		<div class="table-kit-toolbar">
 			<!-- Filter Controls -->
 			{#if features.filtering !== false}
@@ -236,6 +266,17 @@
 						onConditionsChange={(newConditions) => filterConditions.set(newConditions)}
 						logic={$filterLogic}
 						onLogicChange={(newLogic) => filterLogic.set(newLogic)}
+					/>
+				</div>
+			{/if}
+
+			<!-- Group Controls -->
+			{#if features.grouping !== false}
+				<div class="table-kit-groups">
+					<GroupBar
+						{columns}
+						grouping={$grouping}
+						onGroupingChange={(newGrouping) => grouping.set(newGrouping)}
 					/>
 				</div>
 			{/if}
@@ -360,16 +401,66 @@
 				<tbody>
 					{#each $table.getRowModel().rows as row}
 						<tr
-							class:clickable={onRowClick !== undefined}
-							on:click={() => onRowClick && onRowClick(row.original)}
+							class:clickable={onRowClick !== undefined && !row.getIsGrouped()}
+							class:group-row={row.getIsGrouped()}
+							on:click={() => onRowClick && !row.getIsGrouped() && onRowClick(row.original)}
 						>
 							{#each row.getVisibleCells() as cell}
-								<td>
-									<slot name="cell" {cell} column={cell.column.id}>
-										<svelte:component
-											this={flexRender(cell.column.columnDef.cell, cell.getContext())}
-										/>
-									</slot>
+								<td style="padding-left: {row.depth * 2}rem">
+									{#if cell.getIsGrouped()}
+										<!-- Grouping column - show expand/collapse button -->
+										<div class="group-cell">
+											<button
+												class="expand-btn"
+												on:click|stopPropagation={() => row.toggleExpanded()}
+											>
+												{#if row.getIsExpanded()}
+													<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M19 9l-7 7-7-7"
+														/>
+													</svg>
+												{:else}
+													<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M9 5l7 7-7 7"
+														/>
+													</svg>
+												{/if}
+											</button>
+											<strong>
+												<svelte:component
+													this={flexRender(cell.column.columnDef.cell, cell.getContext())}
+												/>
+											</strong>
+											<span class="group-count">({row.subRows.length})</span>
+										</div>
+									{:else if cell.getIsAggregated()}
+										<!-- Aggregated cell - show computed value -->
+										<slot name="cell" {cell} column={cell.column.id}>
+											<svelte:component
+												this={flexRender(
+													cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell,
+													cell.getContext()
+												)}
+											/>
+										</slot>
+									{:else if cell.getIsPlaceholder()}
+										<!-- Placeholder cell - empty -->
+									{:else}
+										<!-- Normal cell -->
+										<slot name="cell" {cell} column={cell.column.id}>
+											<svelte:component
+												this={flexRender(cell.column.columnDef.cell, cell.getContext())}
+											/>
+										</slot>
+									{/if}
 								</td>
 							{/each}
 						</tr>
@@ -689,6 +780,46 @@
 		padding: 1rem 1.5rem;
 		font-size: 0.875rem;
 		color: #111827;
+	}
+
+	/* Group Rows */
+	tbody tr.group-row {
+		background: #f9fafb;
+		font-weight: 500;
+	}
+
+	tbody tr.group-row:hover {
+		background: #f3f4f6;
+	}
+
+	.group-cell {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.expand-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.25rem;
+		background: none;
+		border: none;
+		cursor: pointer;
+		color: #6b7280;
+		border-radius: 0.25rem;
+		transition: all 0.2s;
+	}
+
+	.expand-btn:hover {
+		background: #e5e7eb;
+		color: #374151;
+	}
+
+	.group-count {
+		font-size: 0.75rem;
+		font-weight: 400;
+		color: #6b7280;
 	}
 
 	/* Pagination */

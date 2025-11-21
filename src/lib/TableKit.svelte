@@ -115,6 +115,22 @@
 
 	// Column picker visibility
 	let showColumnPicker = false;
+	let columnPickerButton: HTMLElement | null = null;
+	let columnPickerPosition = { top: 0, left: 0 };
+
+	function updateColumnPickerPosition() {
+		if (columnPickerButton && showColumnPicker) {
+			const rect = columnPickerButton.getBoundingClientRect();
+			columnPickerPosition = {
+				top: rect.bottom + 8, // 8px margin (0.5rem)
+				left: rect.right - 224 // 224px = 14rem dropdown width
+			};
+		}
+	}
+
+	$: if (showColumnPicker) {
+		updateColumnPickerPosition();
+	}
 
 	// Row height and column spacing dropdowns
 	let showRowHeightMenu = false;
@@ -493,6 +509,7 @@
 				<div class="table-kit-column-picker">
 					<div class="relative">
 						<button
+							bind:this={columnPickerButton}
 							on:click={() => (showColumnPicker = !showColumnPicker)}
 							class="column-picker-btn"
 						>
@@ -511,7 +528,10 @@
 							<!-- svelte-ignore a11y-click-events-have-key-events -->
 							<!-- svelte-ignore a11y-no-static-element-interactions -->
 							<div class="backdrop" on:click={() => (showColumnPicker = false)} />
-							<div class="column-picker-dropdown">
+							<div
+								class="column-picker-dropdown"
+								style="top: {columnPickerPosition.top}px; left: {columnPickerPosition.left}px;"
+							>
 								<div class="dropdown-header">
 									<span>Toggle Columns</span>
 									<div class="header-actions">
@@ -916,9 +936,9 @@
 	}
 
 	.column-picker-dropdown {
-		position: absolute;
-		right: 0;
-		z-index: 20;
+		position: fixed; /* Use fixed to break out of container constraints */
+		right: auto;
+		z-index: 30;
 		margin-top: 0.5rem;
 		width: 14rem;
 		border-radius: 0.375rem;
@@ -965,8 +985,8 @@
 	}
 
 	.column-list {
-		min-height: 3rem;
-		max-height: 16rem;
+		min-height: 12rem; /* Ensure picker stays usable even when all columns hidden */
+		max-height: 20rem;
 		overflow-y: auto;
 	}
 

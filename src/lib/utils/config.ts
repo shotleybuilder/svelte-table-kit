@@ -1,0 +1,44 @@
+// Utilities for AI configuration generation and validation
+
+import type { TableConfig } from '../types';
+
+/**
+ * Generate table configuration from AI parameters
+ * This is a placeholder for AI integration
+ */
+export function generateTableConfig(params: {
+	query: string;
+	availableColumns: any[];
+	userData?: Record<string, any>;
+}): Partial<TableConfig> {
+	// TODO: Implement AI configuration generation
+	// This will be connected to Issue #4 (NL query AI agent)
+	console.log('Generating config for query:', params.query);
+
+	return {
+		id: 'ai-generated',
+		version: '1.0.0'
+	};
+}
+
+/**
+ * Validate table configuration against schema
+ */
+export function validateTableConfig(config: Partial<TableConfig>): boolean {
+	// TODO: Implement JSON schema validation
+	return !!config.id;
+}
+
+/**
+ * Merge multiple table configurations
+ */
+export function mergeConfigs(
+	...configs: Partial<TableConfig>[]
+): TableConfig {
+	// TODO: Implement deep merge logic
+	return {
+		id: 'merged',
+		version: '1.0.0',
+		...Object.assign({}, ...configs)
+	};
+}

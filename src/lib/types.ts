@@ -53,7 +53,7 @@ export interface TableConfig {
 	};
 
 	// Filter configuration
-	defaultFilters?: ColumnFilter[];
+	defaultFilters?: FilterCondition[];
 
 	// Sort configuration
 	defaultSorting?: SortConfig[];
@@ -75,10 +75,30 @@ export interface ViewPreset {
 	config: Partial<TableConfig>;
 }
 
-export interface ColumnFilter {
-	columnId: string;
-	operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'lt' | 'gte' | 'lte' | 'between';
-	value: string | number | boolean | [number, number] | string[];
+export type FilterOperator =
+	// String operators
+	| 'equals'
+	| 'not_equals'
+	| 'contains'
+	| 'not_contains'
+	| 'starts_with'
+	| 'ends_with'
+	| 'is_empty'
+	| 'is_not_empty'
+	// Numeric operators
+	| 'greater_than'
+	| 'less_than'
+	| 'greater_or_equal'
+	| 'less_or_equal'
+	// Date operators (future)
+	| 'is_before'
+	| 'is_after';
+
+export interface FilterCondition {
+	id: string;
+	field: string;
+	operator: FilterOperator;
+	value: any;
 }
 
 export interface SortConfig {
@@ -104,7 +124,7 @@ export interface TableState {
 	columnVisibility: Record<string, boolean>;
 	columnOrder: string[];
 	columnSizing: Record<string, number>;
-	columnFilters: ColumnFilter[];
+	columnFilters: FilterCondition[];
 	sorting: SortConfig[];
 	pagination: {
 		pageIndex: number;

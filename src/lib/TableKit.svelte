@@ -32,7 +32,9 @@
 		saveColumnOrder,
 		isBrowser
 	} from './stores/persistence';
-	import type { TableKitProps } from './types';
+	import type { TableKitProps, FilterCondition } from './types';
+	import { applyFilters } from './utils/filters';
+	import FilterBar from './components/FilterBar.svelte';
 
 	type T = $$Generic;
 
@@ -72,6 +74,12 @@
 		persistState && storageKey ? loadColumnOrder(storageKey) : []
 	);
 
+	// Custom filter conditions store (our FilterBar component)
+	let filterConditions = writable<FilterCondition[]>([]);
+
+	// Apply client-side filtering before passing to TanStack Table
+	$: filteredData = applyFilters(data, $filterConditions);
+
 	// Save state to localStorage when it changes
 	$: if (persistState && storageKey && isBrowser) {
 		saveColumnVisibility(storageKey, $columnVisibility);
@@ -88,7 +96,7 @@
 
 	// Create table options
 	const options = writable({
-		data,
+		data: filteredData,
 		columns,
 		columnResizeMode: 'onChange' as const,
 		enableColumnResizing: features.columnResizing !== false,
@@ -143,7 +151,7 @@
 	// Update options when data or state changes
 	$: options.update((old) => ({
 		...old,
-		data,
+		data: filteredData,
 		state: {
 			sorting: $sorting,
 			columnVisibility: $columnVisibility,
@@ -161,10 +169,6 @@
 		$table.getAllLeafColumns().forEach((column) => {
 			column.toggleVisibility(show);
 		});
-	}
-
-	function clearAllFilters() {
-		columnFilters.set([]);
 	}
 
 	function handleDragStart(columnId: string) {
@@ -203,7 +207,7 @@
 	}
 
 	// Check if any filters are active
-	$: hasActiveFilters = $columnFilters.length > 0;
+	$: hasActiveFilters = $filterConditions.length > 0;
 
 	// Emit state changes to parent
 	$: if (onStateChange) {
@@ -225,12 +229,11 @@
 			<!-- Filter Controls -->
 			{#if features.filtering !== false}
 				<div class="table-kit-filters">
-					{#if hasActiveFilters}
-						<button on:click={clearAllFilters} class="clear-filters-btn">
-							Clear All Filters
-						</button>
-					{/if}
-					<slot name="filters" {table} />
+					<FilterBar
+						{columns}
+						conditions={$filterConditions}
+						onConditionsChange={(newConditions) => filterConditions.set(newConditions)}
+					/>
 				</div>
 			{/if}
 

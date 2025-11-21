@@ -3,12 +3,17 @@
 // Main component
 export { default as TableKit } from './TableKit.svelte';
 
+// Sub-components
+export { default as FilterBar } from './components/FilterBar.svelte';
+export { default as FilterCondition } from './components/FilterCondition.svelte';
+
 // TypeScript types
 export type {
 	TableKitProps,
 	TableConfig,
 	ViewPreset,
-	ColumnFilter,
+	FilterCondition,
+	FilterOperator,
 	SortConfig,
 	ClassNameMap,
 	TableFeatures,
@@ -25,8 +30,9 @@ export { generateTableConfig, validateTableConfig, mergeConfigs } from './utils/
 export {
 	createTextFilter,
 	createSelectFilter,
-	createDateRangeFilter,
-	createNumericRangeFilter
+	createNumericFilter,
+	evaluateCondition,
+	applyFilters
 } from './utils/filters';
 
 // Formatters

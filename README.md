@@ -2,7 +2,7 @@
 
 **A comprehensive, AI-configurable data table component for Svelte and SvelteKit, built on TanStack Table v8.**
 
-[![npm version](https://img.shields.io/npm/v/@sertantai/svelte-table-kit.svg)](https://www.npmjs.com/package/@sertantai/svelte-table-kit)
+[![npm version](https://img.shields.io/npm/v/@shotleybuilder/svelte-table-kit.svg)](https://www.npmjs.com/package/@shotleybuilder/svelte-table-kit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Svelte Table Kit brings Airtable-like functionality to your Svelte applications with a headless, fully customizable table component. Perfect for dashboards, data grids, and complex data visualization needs.
@@ -56,13 +56,13 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 ## 📦 Installation
 
 ```bash
-npm install @sertantai/svelte-table-kit
+npm install @shotleybuilder/svelte-table-kit
 ```
 
 Or using pnpm:
 
 ```bash
-pnpm add @sertantai/svelte-table-kit
+pnpm add @shotleybuilder/svelte-table-kit
 ```
 
 ---
@@ -71,7 +71,7 @@ pnpm add @sertantai/svelte-table-kit
 
 ```svelte
 <script>
-  import { TableKit } from '@sertantai/svelte-table-kit';
+  import { TableKit } from '@shotleybuilder/svelte-table-kit';
 
   const data = [
     { id: 1, name: 'Alice', role: 'Developer', age: 28 },
@@ -108,7 +108,7 @@ Use AI-generated or predefined configurations:
 
 ```svelte
 <script>
-  import { TableKit, presets } from '@sertantai/svelte-table-kit';
+  import { TableKit, presets } from '@shotleybuilder/svelte-table-kit';
 
   const config = presets.dashboard; // or generate with AI
 </script>
@@ -234,7 +234,7 @@ MIT © [Sertantai](https://github.com/shotleybuilder)
 ## 🔗 Links
 
 - [GitHub Repository](https://github.com/shotleybuilder/svelte-table-kit)
-- [npm Package](https://www.npmjs.com/package/@sertantai/svelte-table-kit)
+- [npm Package](https://www.npmjs.com/package/@shotleybuilder/svelte-table-kit)
 - [Issue Tracker](https://github.com/shotleybuilder/svelte-table-kit/issues)
 
 ---

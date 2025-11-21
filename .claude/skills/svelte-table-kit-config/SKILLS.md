@@ -1,6 +1,6 @@
 ---
 name: svelte-table-kit-config
-description: Configures @sertantai/svelte-table-kit with advanced filtering (12 operators, AND/OR logic), multi-level grouping (up to 3 levels), sorting, pagination, and column controls. Use when implementing Airtable-like tables in Svelte, when users request table features, or when building data-heavy UIs with complex filtering and grouping requirements.
+description: Configures @shotleybuilder/svelte-table-kit with advanced filtering (12 operators, AND/OR logic), multi-level grouping (up to 3 levels), sorting, pagination, and column controls. Use when implementing Airtable-like tables in Svelte, when users request table features, or when building data-heavy UIs with complex filtering and grouping requirements.
 ---
 
 # Svelte Table Kit Configuration
@@ -21,7 +21,7 @@ Configure production-ready tables with Airtable-like features using TanStack Tab
 ## Installation
 
 ```bash
-npm install @sertantai/svelte-table-kit
+npm install @shotleybuilder/svelte-table-kit
 ```
 
 Peer dependency:
@@ -33,7 +33,7 @@ npm install @tanstack/svelte-table
 
 ```svelte
 <script lang="ts">
-  import { TableKit } from '@sertantai/svelte-table-kit';
+  import { TableKit } from '@shotleybuilder/svelte-table-kit';
   import type { ColumnDef } from '@tanstack/svelte-table';
 
   type User = { id: number; name: string; email: string; role: string };
@@ -75,7 +75,7 @@ FilterBar automatically renders with:
 
 ```svelte
 <script lang="ts">
-  import { createTextFilter, createNumericFilter } from '@sertantai/svelte-table-kit';
+  import { createTextFilter, createNumericFilter } from '@shotleybuilder/svelte-table-kit';
 
   // Create filter conditions
   const filters = [

@@ -1,5 +1,5 @@
 {
-  "name": "@sertantai/svelte-table-kit",
+  "name": "@shotleybuilder/svelte-table-kit",
   "version": "0.1.0",
   "description": "A comprehensive, AI-configurable data table component for Svelte and SvelteKit, built on TanStack Table v8",
   "author": "Sertantai",

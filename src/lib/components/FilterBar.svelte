@@ -80,18 +80,19 @@
 	<!-- Expandable Filter Panel -->
 	{#if isExpanded}
 		<div class="filter-panel">
-			<div class="filter-header">
-				<span class="filter-label">Where</span>
-				{#if hasConditions}
-					<button class="clear-all-btn" on:click={clearAllConditions}> Clear all </button>
-				{/if}
-			</div>
-
 			{#if hasConditions}
+				<div class="filter-header">
+					{#if hasConditions}
+						<button class="clear-all-btn" on:click={clearAllConditions}> Clear all </button>
+					{/if}
+				</div>
+
 				<div class="filter-conditions">
 					{#each conditions as condition, index (condition.id)}
 						<div class="condition-row">
-							{#if index > 0}
+							{#if index === 0}
+								<span class="filter-label">Where</span>
+							{:else}
 								<select
 									class="logic-select"
 									value={logic}
@@ -198,15 +199,24 @@
 
 	.filter-header {
 		display: flex;
-		justify-content: space-between;
+		justify-content: flex-end;
 		align-items: center;
 		margin-bottom: 0.75rem;
 	}
 
 	.filter-label {
-		font-size: 0.875rem;
+		flex-shrink: 0;
+		display: inline-flex;
+		align-items: center;
+		min-width: 60px;
+		padding: 0.375rem 0.5rem;
+		font-size: 0.75rem;
 		font-weight: 600;
 		color: #374151;
+		text-align: left;
+		height: fit-content;
+		margin-top: 0.5rem;
+		box-sizing: border-box;
 	}
 
 	.clear-all-btn {

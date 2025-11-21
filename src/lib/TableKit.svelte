@@ -51,6 +51,8 @@
 	export let storageKey: TableKitProps<T>['storageKey'] = 'table-kit';
 	export let persistState: TableKitProps<T>['persistState'] = true;
 	export let align: TableKitProps<T>['align'] = 'left';
+	export let rowHeight: TableKitProps<T>['rowHeight'] = 'medium';
+	export let columnSpacing: TableKitProps<T>['columnSpacing'] = 'normal';
 	export let features: TableKitProps<T>['features'] = {
 		columnVisibility: true,
 		columnResizing: true,
@@ -88,6 +90,16 @@
 	let grouping = writable<GroupingState>([]);
 	let expanded = writable<ExpandedState>(true); // Default to expanded
 
+	// Compute horizontal padding (column spacing)
+	$: horizontalPadding = columnSpacing === 'narrow' ? 0.5 : columnSpacing === 'wide' ? 2.0 : 1.0;
+
+	// Compute vertical padding (row height)
+	$: verticalPadding =
+		rowHeight === 'short' ? 0.375 :
+		rowHeight === 'tall' ? 1.0 :
+		rowHeight === 'extra_tall' ? 1.5 :
+		0.75; // medium (default)
+
 	// Apply client-side filtering before passing to TanStack Table
 	$: filteredData = applyFilters(data, $filterConditions, $filterLogic);
 
@@ -102,6 +114,10 @@
 	// Column picker visibility
 	let showColumnPicker = false;
 
+	// Row height and column spacing dropdowns
+	let showRowHeightMenu = false;
+	let showColumnSpacingMenu = false;
+
 	// Drag and drop state
 	let draggedColumnId: string | null = null;
 
@@ -112,6 +128,11 @@
 		columnResizeMode: 'onChange' as const,
 		enableColumnResizing: features.columnResizing !== false,
 		enableGrouping: features.grouping !== false,
+		defaultColumn: {
+			size: 180,
+			minSize: 62,
+			maxSize: 1000
+		},
 		state: {
 			sorting: $sorting,
 			columnVisibility: $columnVisibility,
@@ -254,14 +275,7 @@
 	}
 </script>
 
-<div
-	class="table-kit-container"
-	style="--table-align: {align}; --table-justify: {align === 'left'
-		? 'flex-start'
-		: align === 'right'
-			? 'flex-end'
-			: 'center'};"
->
+<div class="table-kit-container align-{align}">
 	<!-- Filters and Controls -->
 	{#if features.filtering !== false || features.grouping !== false || features.columnVisibility !== false}
 		<div class="table-kit-toolbar">
@@ -288,6 +302,172 @@
 					/>
 				</div>
 			{/if}
+
+			<!-- View Controls: Row Height and Column Spacing -->
+			<div class="table-kit-view-controls">
+				<!-- Row Height Button -->
+				<div class="relative">
+					<button
+						on:click={() => (showRowHeightMenu = !showRowHeightMenu)}
+						class="view-control-btn"
+						title="Row Height"
+					>
+						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+							/>
+						</svg>
+					</button>
+
+					{#if showRowHeightMenu}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<div class="backdrop" on:click={() => (showRowHeightMenu = false)} />
+						<div class="dropdown-menu">
+							<div class="dropdown-header">
+								<span>Row Height</span>
+							</div>
+							<button
+								class="dropdown-item"
+								class:active={rowHeight === 'short'}
+								on:click={() => {
+									rowHeight = 'short';
+									showRowHeightMenu = false;
+								}}
+							>
+								<span class="item-icon">
+									<svg class="icon-sm" viewBox="0 0 16 16" fill="currentColor">
+										<rect x="2" y="7" width="12" height="2" />
+									</svg>
+								</span>
+								Short
+							</button>
+							<button
+								class="dropdown-item"
+								class:active={rowHeight === 'medium'}
+								on:click={() => {
+									rowHeight = 'medium';
+									showRowHeightMenu = false;
+								}}
+							>
+								<span class="item-icon">
+									<svg class="icon-sm" viewBox="0 0 16 16" fill="currentColor">
+										<rect x="2" y="6" width="12" height="4" />
+									</svg>
+								</span>
+								Medium
+							</button>
+							<button
+								class="dropdown-item"
+								class:active={rowHeight === 'tall'}
+								on:click={() => {
+									rowHeight = 'tall';
+									showRowHeightMenu = false;
+								}}
+							>
+								<span class="item-icon">
+									<svg class="icon-sm" viewBox="0 0 16 16" fill="currentColor">
+										<rect x="2" y="4" width="12" height="8" />
+									</svg>
+								</span>
+								Tall
+							</button>
+							<button
+								class="dropdown-item"
+								class:active={rowHeight === 'extra_tall'}
+								on:click={() => {
+									rowHeight = 'extra_tall';
+									showRowHeightMenu = false;
+								}}
+							>
+								<span class="item-icon">
+									<svg class="icon-sm" viewBox="0 0 16 16" fill="currentColor">
+										<rect x="2" y="2" width="12" height="12" />
+									</svg>
+								</span>
+								Extra Tall
+							</button>
+						</div>
+					{/if}
+				</div>
+
+				<!-- Column Spacing Button -->
+				<div class="relative">
+					<button
+						on:click={() => (showColumnSpacingMenu = !showColumnSpacingMenu)}
+						class="view-control-btn"
+						title="Column Spacing"
+					>
+						<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+							/>
+						</svg>
+					</button>
+
+					{#if showColumnSpacingMenu}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<div class="backdrop" on:click={() => (showColumnSpacingMenu = false)} />
+						<div class="dropdown-menu">
+							<div class="dropdown-header">
+								<span>Column Spacing</span>
+							</div>
+							<button
+								class="dropdown-item"
+								class:active={columnSpacing === 'narrow'}
+								on:click={() => {
+									columnSpacing = 'narrow';
+									showColumnSpacingMenu = false;
+								}}
+							>
+								<span class="item-icon">
+									<svg class="icon-sm" viewBox="0 0 16 16" fill="currentColor">
+										<rect x="6" y="2" width="4" height="12" />
+									</svg>
+								</span>
+								Narrow
+							</button>
+							<button
+								class="dropdown-item"
+								class:active={columnSpacing === 'normal'}
+								on:click={() => {
+									columnSpacing = 'normal';
+									showColumnSpacingMenu = false;
+								}}
+							>
+								<span class="item-icon">
+									<svg class="icon-sm" viewBox="0 0 16 16" fill="currentColor">
+										<rect x="4" y="2" width="8" height="12" />
+									</svg>
+								</span>
+								Normal
+							</button>
+							<button
+								class="dropdown-item"
+								class:active={columnSpacing === 'wide'}
+								on:click={() => {
+									columnSpacing = 'wide';
+									showColumnSpacingMenu = false;
+								}}
+							>
+								<span class="item-icon">
+									<svg class="icon-sm" viewBox="0 0 16 16" fill="currentColor">
+										<rect x="2" y="2" width="12" height="12" />
+									</svg>
+								</span>
+								Wide
+							</button>
+						</div>
+					{/if}
+				</div>
+			</div>
 
 			<!-- Column Picker -->
 			{#if features.columnVisibility !== false}
@@ -360,26 +540,31 @@
 						<tr>
 							{#each headerGroup.headers as header}
 								<th
-									draggable={features.columnReordering !== false}
-									on:dragstart={() => handleDragStart(header.column.id)}
 									on:dragover={handleDragOver}
 									on:drop|preventDefault={() => handleDrop(header.column.id)}
 									class:dragging={draggedColumnId === header.column.id}
-									style="width: {header.getSize()}px; cursor: {features.columnReordering !==
-									false
-										? 'grab'
-										: 'default'};"
+									style="width: {header.getSize()}px;"
 								>
 									{#if !header.isPlaceholder}
-										<div class="th-content">
+										<div
+											class="th-content"
+											style="padding: {verticalPadding}rem {horizontalPadding}rem; cursor: {features.columnReordering !==
+											false
+												? 'grab'
+												: 'default'};"
+											draggable={features.columnReordering !== false}
+											on:dragstart={() => handleDragStart(header.column.id)}
+										>
 											<button
 												class="sort-btn"
 												class:sortable={header.column.getCanSort()}
 												on:click={header.column.getToggleSortingHandler()}
 											>
-												<svelte:component
-													this={flexRender(header.column.columnDef.header, header.getContext())}
-												/>
+												<span class="header-text">
+													<svelte:component
+														this={flexRender(header.column.columnDef.header, header.getContext())}
+													/>
+												</span>
 												{#if features.sorting !== false && header.column.getCanSort()}
 													<span class="sort-icon">
 														{{
@@ -394,8 +579,14 @@
 										{#if features.columnResizing !== false && header.column.getCanResize()}
 											<!-- svelte-ignore a11y-no-static-element-interactions -->
 											<div
-												on:mousedown={header.getResizeHandler()}
-												on:touchstart={header.getResizeHandler()}
+												on:mousedown={(e) => {
+													e.stopPropagation();
+													header.getResizeHandler()(e);
+												}}
+												on:touchstart={(e) => {
+													e.stopPropagation();
+													header.getResizeHandler()(e);
+												}}
 												class="resize-handle"
 												class:resizing={header.column.getIsResizing()}
 											/>
@@ -412,9 +603,10 @@
 							class:clickable={onRowClick !== undefined && !row.getIsGrouped()}
 							class:group-row={row.getIsGrouped()}
 							on:click={() => onRowClick && !row.getIsGrouped() && onRowClick(row.original)}
+							style="--cell-padding-vertical: {verticalPadding}rem; --cell-padding-horizontal: {horizontalPadding}rem;"
 						>
 							{#each row.getVisibleCells() as cell}
-								<td style="padding-left: {row.depth * 2}rem">
+								<td style="text-align: {align}; width: {cell.column.getSize()}px;">
 									{#if cell.getIsGrouped()}
 										<!-- Grouping column - show expand/collapse button -->
 										<div class="group-cell">
@@ -463,11 +655,13 @@
 										<!-- Placeholder cell - empty -->
 									{:else}
 										<!-- Normal cell -->
-										<slot name="cell" {cell} column={cell.column.id}>
-											<svelte:component
-												this={flexRender(cell.column.columnDef.cell, cell.getContext())}
-											/>
-										</slot>
+										<div class="cell-content">
+											<slot name="cell" {cell} column={cell.column.id}>
+												<svelte:component
+													this={flexRender(cell.column.columnDef.cell, cell.getContext())}
+												/>
+											</slot>
+										</div>
 									{/if}
 								</td>
 							{/each}
@@ -540,6 +734,7 @@
 	/* Container */
 	.table-kit-container {
 		width: 100%;
+		overflow-x: auto;
 	}
 
 	/* Toolbar */
@@ -578,6 +773,28 @@
 		position: relative;
 	}
 
+	.table-kit-view-controls {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.view-control-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem;
+		color: #374151;
+		background: white;
+		border: 1px solid #d1d5db;
+		border-radius: 0.375rem;
+		cursor: pointer;
+		transition: background 0.15s;
+	}
+
+	.view-control-btn:hover {
+		background: #f9fafb;
+	}
+
 	.column-picker-btn {
 		display: inline-flex;
 		align-items: center;
@@ -599,6 +816,72 @@
 	.icon {
 		width: 1rem;
 		height: 1rem;
+	}
+
+	.icon-sm {
+		width: 0.875rem;
+		height: 0.875rem;
+	}
+
+	.dropdown-menu {
+		position: absolute;
+		top: calc(100% + 0.25rem);
+		right: 0;
+		min-width: 10rem;
+		background: white;
+		border: 1px solid #d1d5db;
+		border-radius: 0.5rem;
+		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+		z-index: 20;
+		overflow: hidden;
+	}
+
+	.dropdown-header {
+		padding: 0.5rem 0.75rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #6b7280;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.dropdown-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		width: 100%;
+		padding: 0.625rem 0.75rem;
+		font-size: 0.875rem;
+		color: #374151;
+		background: white;
+		border: none;
+		text-align: left;
+		cursor: pointer;
+		transition: background 0.15s;
+	}
+
+	.dropdown-item:hover {
+		background: #f9fafb;
+	}
+
+	.dropdown-item.active {
+		background: #eff6ff;
+		color: #2563eb;
+		font-weight: 500;
+	}
+
+	.item-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.25rem;
+		height: 1.25rem;
+		color: #9ca3af;
+	}
+
+	.dropdown-item.active .item-icon {
+		color: #2563eb;
 	}
 
 	.backdrop {
@@ -696,8 +979,9 @@
 	}
 
 	.table-kit-table {
-		width: 100%;
+		width: auto;
 		border-collapse: collapse;
+		table-layout: fixed;
 	}
 
 	thead {
@@ -706,14 +990,26 @@
 
 	th {
 		position: relative;
-		padding: 0.75rem 1.5rem;
-		text-align: var(--table-align, left);
+		padding: 0;
+		text-align: left;
 		font-size: 0.75rem;
 		font-weight: 500;
 		color: #6b7280;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		transition: opacity 0.2s;
+	}
+
+	.table-kit-container.align-left th {
+		text-align: left !important;
+	}
+
+	.table-kit-container.align-center th {
+		text-align: center !important;
+	}
+
+	.table-kit-container.align-right th {
+		text-align: right !important;
 	}
 
 	th.dragging {
@@ -724,7 +1020,21 @@
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
-		justify-content: var(--table-justify, flex-start);
+		justify-content: flex-start;
+		overflow: hidden;
+		min-width: 0;
+	}
+
+	.table-kit-container.align-left .th-content {
+		justify-content: flex-start !important;
+	}
+
+	.table-kit-container.align-center .th-content {
+		justify-content: center !important;
+	}
+
+	.table-kit-container.align-right .th-content {
+		justify-content: flex-end !important;
 	}
 
 	.sort-btn {
@@ -739,6 +1049,18 @@
 		color: inherit;
 		text-transform: inherit;
 		letter-spacing: inherit;
+		overflow: hidden;
+		min-width: 0;
+		flex: 1;
+	}
+
+	.header-text {
+		display: block;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		min-width: 0;
+		max-width: 100%;
 	}
 
 	.sort-btn.sortable {
@@ -756,21 +1078,31 @@
 	.resize-handle {
 		position: absolute;
 		top: 0;
-		right: 0;
+		right: -0.375rem;
 		height: 100%;
-		width: 0.25rem;
+		width: 0.75rem;
 		cursor: col-resize;
 		user-select: none;
 		touch-action: none;
 		background: transparent;
-		opacity: 0;
-		transition: opacity 0.2s, background 0.2s;
+		z-index: 10;
+		transition: background 0.15s;
 	}
 
-	.resize-handle:hover,
-	.resize-handle.resizing {
+	.resize-handle:hover {
+		background: rgba(79, 70, 229, 0.1);
+	}
+
+	.resize-handle:hover::after,
+	.resize-handle.resizing::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		height: 100%;
+		width: 0.125rem;
 		background: #4f46e5;
-		opacity: 1;
 	}
 
 	tbody tr {
@@ -786,10 +1118,32 @@
 	}
 
 	td {
-		padding: 1rem 1.5rem;
 		font-size: 0.875rem;
 		color: #111827;
-		text-align: var(--table-align, left);
+		text-align: left;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		max-width: 0;
+	}
+
+	.table-kit-container.align-left td {
+		text-align: left !important;
+	}
+
+	.table-kit-container.align-center td {
+		text-align: center !important;
+	}
+
+	.table-kit-container.align-right td {
+		text-align: right !important;
+	}
+
+	.cell-content {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		padding: var(--cell-padding-vertical, 1rem) var(--cell-padding-horizontal, 1rem);
 	}
 
 	/* Group Rows */

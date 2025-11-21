@@ -1,6 +1,6 @@
 ---
 name: svelte-table-kit-config
-description: Configures @shotleybuilder/svelte-table-kit with advanced filtering (12 operators, AND/OR logic), multi-level grouping (up to 3 levels), sorting, pagination, and column controls. Use when implementing Airtable-like tables in Svelte, when users request table features, or when building data-heavy UIs with complex filtering and grouping requirements.
+description: Configures @shotleybuilder/svelte-table-kit with advanced filtering (12 operators, AND/OR logic), multi-level grouping (up to 3 levels), sorting, pagination, column controls (resizing, reordering, visibility), row height & column spacing adjustments, and text truncation. Use when implementing Airtable-like tables in Svelte, when users request table features, or when building data-heavy UIs with complex filtering and grouping requirements.
 ---
 
 # Svelte Table Kit Configuration
@@ -170,7 +170,7 @@ Column picker dropdown with:
 />
 ```
 
-Drag column borders to resize.
+Drag column borders to resize (62px-1000px range). Text automatically truncates with ellipsis when columns are narrow.
 
 ### Reordering
 
@@ -207,6 +207,30 @@ Click headers to sort. Visual indicators: ↑ ↓ ↕
 ```
 
 Pagination controls with page size options.
+
+### Row Height & Column Spacing
+
+```svelte
+<TableKit
+  {data}
+  {columns}
+  rowHeight="medium"
+  columnSpacing="normal"
+/>
+```
+
+**Row Height Options:**
+- `'short'` - Compact rows (0.375rem vertical padding)
+- `'medium'` - Default (0.75rem vertical padding)
+- `'tall'` - Spacious rows (1.0rem vertical padding)
+- `'extra_tall'` - Maximum spacing (1.5rem vertical padding)
+
+**Column Spacing Options:**
+- `'narrow'` - Tight spacing (0.5rem horizontal padding)
+- `'normal'` - Default (1.0rem horizontal padding)
+- `'wide'` - Generous spacing (2.0rem horizontal padding)
+
+Built-in toolbar controls allow users to adjust these settings with dropdown menus.
 
 ## State Persistence
 

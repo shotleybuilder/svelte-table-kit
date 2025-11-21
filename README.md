@@ -13,13 +13,16 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 
 **Core Table Features:**
 - 🎯 Column visibility picker with show/hide controls
-- 📏 Column resizing with drag handles
+- 📏 Column resizing with drag handles (62px-1000px range)
 - 🔄 Column reordering via native HTML5 drag & drop
+- 📐 **Row height control** - 4 sizes: short, medium, tall, extra tall
+- ↔️ **Column spacing control** - 3 sizes: narrow, normal, wide
 - 🔍 **Advanced filtering** - 12 operators with AND/OR logic
 - 📊 **Multi-level grouping** - Up to 3 nested levels (like Airtable)
 - ⬆️ Multi-column sorting with visual indicators
 - 📄 Pagination with customizable page sizes
 - 💾 LocalStorage persistence for all user preferences
+- ✂️ Text truncation with ellipsis for long content
 
 **Advanced Filtering:**
 - 12 filter operators: equals, contains, starts with, greater than, etc.
@@ -203,6 +206,9 @@ TableKit is headless by default. You can:
 | `storageKey` | `string` | `undefined` | LocalStorage key for persistence |
 | `persistState` | `boolean` | `true` | Enable state persistence |
 | `theme` | `'light' \| 'dark' \| 'auto'` | `'light'` | Theme mode |
+| `align` | `'left' \| 'center' \| 'right'` | `'left'` | Column text alignment |
+| `rowHeight` | `'short' \| 'medium' \| 'tall' \| 'extra_tall'` | `'medium'` | Row height preset |
+| `columnSpacing` | `'narrow' \| 'normal' \| 'wide'` | `'normal'` | Column horizontal spacing |
 | `onRowClick` | `(row: T) => void` | `undefined` | Row click handler |
 | `onRowSelect` | `(rows: T[]) => void` | `undefined` | Row selection handler |
 | `onStateChange` | `(state: TableState) => void` | `undefined` | State change handler |

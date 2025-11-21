@@ -21,6 +21,8 @@ export interface TableKitProps<T = any> {
 	theme?: 'light' | 'dark' | 'auto';
 	classNames?: Partial<ClassNameMap>;
 	align?: 'left' | 'center' | 'right';
+	rowHeight?: 'short' | 'medium' | 'tall' | 'extra_tall';
+	columnSpacing?: 'narrow' | 'normal' | 'wide';
 
 	// Callbacks
 	onRowClick?: (row: T) => void;

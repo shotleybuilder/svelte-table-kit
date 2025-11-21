@@ -89,6 +89,12 @@
 		console.log('Row clicked:', row);
 		alert(`Clicked: ${row.organization}`);
 	}
+
+	// Row height control
+	let rowHeight: 'short' | 'medium' | 'tall' | 'extra_tall' = 'medium';
+
+	// Column spacing control
+	let columnSpacing: 'narrow' | 'normal' | 'wide' = 'normal';
 </script>
 
 <svelte:head>
@@ -109,13 +115,17 @@
 			<h2>✨ Full-Featured Example</h2>
 			<p class="description">
 				Try column resizing (drag borders), reordering (drag headers), sorting (click headers),
-				and visibility (Columns button)
+				row height and column spacing controls (toolbar buttons), and column visibility (Columns button)
 			</p>
+
 			<TableKit
 				{data}
 				{columns}
-				storageKey="example-table"
+				{rowHeight}
+				{columnSpacing}
+				storageKey="example-table-v4"
 				onRowClick={handleRowClick}
+				align="left"
 				features={{
 					columnVisibility: true,
 					columnResizing: true,

@@ -4,16 +4,14 @@ This document outlines the development pipeline for svelte-table-kit, organized 
 
 ---
 
-## ✅ Completed Features (v0.1.0)
+## ✅ Completed Features
 
-### Core Table Features
+### v0.1.0 - Core Features
 - [x] **Column visibility** - Show/hide columns with picker dropdown
 - [x] **Column resizing** - Drag to resize column widths
 - [x] **Column reordering** - Native HTML5 drag & drop
 - [x] **Sorting** - Click headers to sort (asc/desc/none)
 - [x] **Pagination** - Navigate pages with controls
-
-### Advanced Features
 - [x] **Multi-level grouping** - Up to 3 nested group levels (like Airtable)
 - [x] **Expand/collapse groups** - Toggle group visibility
 - [x] **Advanced filtering** - 12 operators with AND/OR logic
@@ -21,9 +19,20 @@ This document outlines the development pipeline for svelte-table-kit, organized 
 - [x] **State persistence** - Save preferences to localStorage
 - [x] **Feature flags** - Granular control over enabled features
 
+### v0.2.0 - Layout Controls
+- [x] **Row height control** - 4 sizes: short, medium, tall, extra tall
+- [x] **Column spacing control** - 3 sizes: narrow, normal, wide
+- [x] **Column alignment** - Left, center, right text alignment
+
+### v0.3.0 - Sort Control
+- [x] **Airtable-style sort control** - Dedicated SortBar component
+- [x] **Sort mode toggle** - Choose between header or control mode
+- [x] **Multi-level sorting** - Add multiple sort levels with direction control
+- [x] **Sort persistence** - Sorting state saved to localStorage
+
 ---
 
-## 🚀 Next Release (v0.2.0) - Native TanStack Features
+## 🚀 Next Release (v0.4.0) - Native TanStack Features
 
 These features are **fully supported** by TanStack Table v8 API and can be implemented using built-in functionality.
 

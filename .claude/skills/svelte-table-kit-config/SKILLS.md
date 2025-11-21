@@ -11,6 +11,7 @@ Configure production-ready tables with Airtable-like features using TanStack Tab
 
 - [Installation](#installation)
 - [Basic Setup](#basic-setup)
+- [Sorting](#sorting)
 - [Advanced Filtering](#advanced-filtering)
 - [Multi-Level Grouping](#multi-level-grouping)
 - [Column Controls](#column-controls)
@@ -52,6 +53,52 @@ npm install @tanstack/svelte-table
 </script>
 
 <TableKit {data} {columns} />
+```
+
+## Sorting
+
+### Column Header Sorting (Default)
+
+Click column headers to sort:
+
+```svelte
+<TableKit {data} {columns} features={{ sorting: true }} />
+```
+
+Headers show ↑ (asc), ↓ (desc), or ↕ (unsorted) indicators.
+
+### Airtable-Style Sort Control
+
+Use dedicated sort dropdown (like Airtable):
+
+```svelte
+<TableKit
+  {data}
+  {columns}
+  features={{
+    sorting: true,
+    sortingMode: 'control'  // Use sort dropdown instead of column headers
+  }}
+/>
+```
+
+SortBar renders with:
+- Column selector dropdown
+- Direction selector: "↑ A → Z" (ascending) or "↓ Z → A" (descending)
+- Multiple sort levels (applied top to bottom)
+- Remove and "Clear all" buttons
+
+**When to use:**
+- `sortingMode: 'header'` (default) - Traditional table sorting, click headers
+- `sortingMode: 'control'` - Airtable-style UI, better for complex multi-column sorts
+
+### Disable Sorting on Specific Columns
+
+```typescript
+const columns: ColumnDef<T>[] = [
+  { accessorKey: 'id', header: 'ID', enableSorting: false },
+  { accessorKey: 'name', header: 'Name' }  // Sortable by default
+];
 ```
 
 ## Advanced Filtering
@@ -390,6 +437,15 @@ applyConfig(config);
 - Verify `features.grouping !== false`
 - Set `enableGrouping: true` on columns (or leave undefined, defaults to true)
 - Ensure column has `accessorKey` or `id`
+
+**SortBar not showing:**
+- Verify `features.sorting !== false` and `features.sortingMode === 'control'`
+- Check columns have `accessorKey` or `id`
+- Ensure columns have `enableSorting !== false`
+
+**Column headers still sortable with sortingMode: 'control':**
+- Check `sortingMode` is set to `'control'` not `'header'`
+- Verify feature flag is in `features` object
 
 **State not persisting:**
 - Check `persistState={true}` is set

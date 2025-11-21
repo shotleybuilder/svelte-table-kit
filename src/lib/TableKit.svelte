@@ -40,6 +40,7 @@
 	import { applyFilters } from './utils/filters';
 	import FilterBar from './components/FilterBar.svelte';
 	import GroupBar from './components/GroupBar.svelte';
+	import SortBar from './components/SortBar.svelte';
 
 	type T = $$Generic;
 
@@ -59,6 +60,7 @@
 		columnReordering: true,
 		filtering: true,
 		sorting: true,
+		sortingMode: 'header', // 'header' or 'control'
 		pagination: true
 	};
 
@@ -262,6 +264,12 @@
 	// Check if any filters are active
 	$: hasActiveFilters = $filterConditions.length > 0;
 
+	// Calculate total table width from column sizes
+	// This ensures table-layout: fixed respects column widths when table overflows container
+	$: totalTableWidth = $table
+		.getVisibleLeafColumns()
+		.reduce((sum, col) => sum + col.getSize(), 0);
+
 	// Emit state changes to parent
 	$: if (onStateChange) {
 		onStateChange({
@@ -277,7 +285,7 @@
 
 <div class="table-kit-container align-{align}">
 	<!-- Filters and Controls -->
-	{#if features.filtering !== false || features.grouping !== false || features.columnVisibility !== false}
+	{#if features.filtering !== false || features.grouping !== false || features.columnVisibility !== false || (features.sorting !== false && features.sortingMode === 'control')}
 		<div class="table-kit-toolbar">
 			<!-- Filter Controls -->
 			{#if features.filtering !== false}
@@ -288,6 +296,17 @@
 						onConditionsChange={(newConditions) => filterConditions.set(newConditions)}
 						logic={$filterLogic}
 						onLogicChange={(newLogic) => filterLogic.set(newLogic)}
+					/>
+				</div>
+			{/if}
+
+			<!-- Sort Controls (when sortingMode is 'control') -->
+			{#if features.sorting !== false && features.sortingMode === 'control'}
+				<div class="table-kit-sorts">
+					<SortBar
+						{columns}
+						sorting={$sorting}
+						onSortingChange={(newSorting) => sorting.set(newSorting)}
 					/>
 				</div>
 			{/if}
@@ -534,7 +553,7 @@
 		</div>
 	{:else}
 		<div class="table-kit-scroll">
-			<table class="table-kit-table">
+			<table class="table-kit-table" style="width: {totalTableWidth}px;">
 				<thead>
 					{#each $table.getHeaderGroups() as headerGroup}
 						<tr>
@@ -555,25 +574,31 @@
 											draggable={features.columnReordering !== false}
 											on:dragstart={() => handleDragStart(header.column.id)}
 										>
-											<button
-												class="sort-btn"
-												class:sortable={header.column.getCanSort()}
-												on:click={header.column.getToggleSortingHandler()}
-											>
-												<span class="header-text">
-													<svelte:component
-														this={flexRender(header.column.columnDef.header, header.getContext())}
-													/>
-												</span>
-												{#if features.sorting !== false && header.column.getCanSort()}
+											{#if features.sorting !== false && features.sortingMode !== 'control' && header.column.getCanSort()}
+												<button
+													class="sort-btn"
+													class:sortable={header.column.getCanSort()}
+													on:click={header.column.getToggleSortingHandler()}
+												>
+													<span class="header-text">
+														<svelte:component
+															this={flexRender(header.column.columnDef.header, header.getContext())}
+														/>
+													</span>
 													<span class="sort-icon">
 														{{
 															asc: '↑',
 															desc: '↓'
 														}[header.column.getIsSorted()] ?? '↕'}
 													</span>
-												{/if}
-											</button>
+												</button>
+											{:else}
+												<span class="header-text">
+													<svelte:component
+														this={flexRender(header.column.columnDef.header, header.getContext())}
+													/>
+												</span>
+											{/if}
 										</div>
 										<!-- Resize Handle -->
 										{#if features.columnResizing !== false && header.column.getCanResize()}
@@ -980,9 +1005,9 @@
 	}
 
 	.table-kit-table {
-		width: auto;
 		border-collapse: collapse;
 		table-layout: fixed;
+		min-width: 100%; /* Ensure table is at least full container width */
 	}
 
 	thead {

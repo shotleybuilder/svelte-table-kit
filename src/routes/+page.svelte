@@ -108,14 +108,17 @@
 		<p class="subtitle">
 			Extracted from sertantai-enforcement • Built on TanStack Table v8
 		</p>
+		<nav class="test-links">
+			<a href="/wide-table">🧪 Wide Table Test (16 columns)</a>
+		</nav>
 	</header>
 
 	<main>
 		<section>
 			<h2>✨ Full-Featured Example</h2>
 			<p class="description">
-				Try column resizing (drag borders), reordering (drag headers), sorting (click headers),
-				row height and column spacing controls (toolbar buttons), and column visibility (Columns button)
+				Try column resizing (drag borders), reordering (drag headers), Airtable-style sorting (Sort button),
+				filtering (Filter button), row height and column spacing controls (toolbar buttons), and column visibility (Columns button)
 			</p>
 
 			<TableKit
@@ -131,6 +134,7 @@
 					columnResizing: true,
 					columnReordering: true,
 					sorting: true,
+					sortingMode: 'control', // Use Airtable-style sort control
 					pagination: true,
 					filtering: true
 				}}
@@ -185,6 +189,27 @@
 		font-size: 1.2rem;
 		color: #666;
 		margin: 0;
+	}
+
+	.test-links {
+		margin-top: 1rem;
+	}
+
+	.test-links a {
+		display: inline-block;
+		padding: 0.5rem 1rem;
+		background: #f0f9ff;
+		color: #0369a1;
+		text-decoration: none;
+		border-radius: 0.375rem;
+		border: 1px solid #0ea5e9;
+		font-weight: 500;
+		transition: all 0.2s;
+	}
+
+	.test-links a:hover {
+		background: #0ea5e9;
+		color: white;
 	}
 
 	h2 {

@@ -36,6 +36,7 @@ export interface TableFeatures {
 	columnReordering?: boolean;
 	filtering?: boolean;
 	sorting?: boolean;
+	sortingMode?: 'header' | 'control'; // Choose between column header sorting or dedicated sort control
 	pagination?: boolean;
 	rowSelection?: boolean;
 	grouping?: boolean;

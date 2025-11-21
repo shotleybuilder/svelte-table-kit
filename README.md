@@ -19,7 +19,7 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - ↔️ **Column spacing control** - 3 sizes: narrow, normal, wide
 - 🔍 **Advanced filtering** - 12 operators with AND/OR logic
 - 📊 **Multi-level grouping** - Up to 3 nested levels (like Airtable)
-- ⬆️ Multi-column sorting with visual indicators
+- ⬆️ **Flexible sorting** - Column header or Airtable-style sort control
 - 📄 Pagination with customizable page sizes
 - 💾 LocalStorage persistence for all user preferences
 - ✂️ Text truncation with ellipsis for long content
@@ -30,6 +30,13 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - Collapsible FilterBar UI (space-efficient)
 - Active filter count badge
 - Real-time filtering as you type
+
+**Sorting Options:**
+- **Column header mode** (default) - Click headers to sort with ↑↓↕ indicators
+- **Airtable-style control** - Dedicated sort dropdown with multi-level sorting
+- Choose column and direction (A → Z or Z → A)
+- Multiple sort levels applied top to bottom
+- Collapsible SortBar UI
 
 **Grouping & Hierarchy:**
 - Group by up to 3 columns simultaneously
@@ -143,12 +150,17 @@ Control which features are enabled:
     columnReordering: true,
     filtering: true,
     sorting: true,
+    sortingMode: 'control',  // 'header' (default) or 'control' (Airtable-style)
     pagination: true,
     rowSelection: false,
     grouping: false
   }}
 />
 ```
+
+**Sorting Modes:**
+- `sortingMode: 'header'` - Click column headers to sort (default behavior)
+- `sortingMode: 'control'` - Use Airtable-style sort dropdown with multi-level support
 
 ### Event Handlers
 

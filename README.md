@@ -15,10 +15,25 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - 🎯 Column visibility picker with show/hide controls
 - 📏 Column resizing with drag handles
 - 🔄 Column reordering via native HTML5 drag & drop
-- 🔍 Advanced filtering (text, select, multi-column)
+- 🔍 **Advanced filtering** - 12 operators with AND/OR logic
+- 📊 **Multi-level grouping** - Up to 3 nested levels (like Airtable)
 - ⬆️ Multi-column sorting with visual indicators
 - 📄 Pagination with customizable page sizes
 - 💾 LocalStorage persistence for all user preferences
+
+**Advanced Filtering:**
+- 12 filter operators: equals, contains, starts with, greater than, etc.
+- AND/OR logic between conditions
+- Collapsible FilterBar UI (space-efficient)
+- Active filter count badge
+- Real-time filtering as you type
+
+**Grouping & Hierarchy:**
+- Group by up to 3 columns simultaneously
+- Expand/collapse groups with chevron buttons
+- Visual indentation based on nesting level
+- Item count per group
+- Collapsible GroupBar UI
 
 **Developer Experience:**
 - 🎨 Headless design - style it your way
@@ -33,6 +48,8 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - 🧠 AI agents can generate table configs from natural language
 - 📋 Preset configurations for common use cases
 - 🔧 Programmatic table setup and state management
+
+📅 **[View Development Roadmap](./ROADMAP.md)** - See what's coming next!
 
 ---
 

@@ -8,9 +8,8 @@
 	export let onConditionsChange: (conditions: FilterCondition[]) => void;
 	export let logic: FilterLogic = 'and';
 	export let onLogicChange: (logic: FilterLogic) => void;
-
-	// Collapsible state
-	let isExpanded = false;
+	export let isExpanded = false;
+	export let onExpandedChange: ((expanded: boolean) => void) | undefined = undefined;
 
 	function generateId(): string {
 		return `filter-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -24,7 +23,14 @@
 			value: ''
 		};
 		onConditionsChange([...conditions, newCondition]);
-		isExpanded = true; // Auto-expand when adding a condition
+		setExpanded(true); // Auto-expand when adding a condition
+	}
+
+	function setExpanded(value: boolean) {
+		isExpanded = value;
+		if (onExpandedChange) {
+			onExpandedChange(value);
+		}
 	}
 
 	function updateCondition(index: number, updated: FilterCondition) {
@@ -38,13 +44,13 @@
 		onConditionsChange(newConditions);
 		// Auto-collapse if no conditions left
 		if (newConditions.length === 0) {
-			isExpanded = false;
+			setExpanded(false);
 		}
 	}
 
 	function clearAllConditions() {
 		onConditionsChange([]);
-		isExpanded = false; // Collapse when clearing all
+		setExpanded(false); // Collapse when clearing all
 	}
 
 	$: hasConditions = conditions.length > 0;
@@ -59,7 +65,7 @@
 
 <div class="filter-bar">
 	<!-- Compact Filter Button -->
-	<button class="filter-toggle-btn" on:click={() => (isExpanded = !isExpanded)}>
+	<button class="filter-toggle-btn" on:click={() => setExpanded(!isExpanded)}>
 		<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
 				stroke-linecap="round"

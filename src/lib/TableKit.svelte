@@ -88,6 +88,7 @@
 	// Custom filter conditions store (our FilterBar component)
 	let filterConditions = writable<FilterCondition[]>([]);
 	let filterLogic = writable<FilterLogic>('and');
+	let filterBarExpanded = false;
 
 	// Grouping state stores
 	let grouping = writable<GroupingState>([]);
@@ -121,6 +122,23 @@
 
 	// Column menu state - track which column's menu is open
 	let openColumnMenuId: string | null = null;
+
+	// Generate unique ID for filter conditions
+	function generateFilterId(): string {
+		return `filter-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+	}
+
+	// Add a filter for a specific column
+	function addFilterForColumn(columnId: string) {
+		const newCondition: FilterCondition = {
+			id: generateFilterId(),
+			field: columnId,
+			operator: 'equals',
+			value: ''
+		};
+		filterConditions.update((conditions) => [...conditions, newCondition]);
+		filterBarExpanded = true;
+	}
 
 	function updateColumnPickerPosition() {
 		if (columnPickerButton && showColumnPicker) {
@@ -316,6 +334,8 @@
 						onConditionsChange={(newConditions) => filterConditions.set(newConditions)}
 						logic={$filterLogic}
 						onLogicChange={(newLogic) => filterLogic.set(newLogic)}
+						isExpanded={filterBarExpanded}
+						onExpandedChange={(expanded) => (filterBarExpanded = expanded)}
 					/>
 				</div>
 			{/if}
@@ -657,9 +677,14 @@
 												column={header.column}
 												isOpen={openColumnMenuId === header.column.id}
 												canSort={features.sorting !== false}
+												canFilter={features.filtering !== false}
 												on:sort={(e) => {
 													const direction = e.detail.direction;
 													header.column.toggleSorting(direction === 'desc');
+													openColumnMenuId = null;
+												}}
+												on:filter={() => {
+													addFilterForColumn(header.column.id);
 													openColumnMenuId = null;
 												}}
 												on:hide={() => {

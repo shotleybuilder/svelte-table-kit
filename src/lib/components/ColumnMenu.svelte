@@ -6,6 +6,7 @@
 	export let column: Column<any>;
 	export let isOpen = false;
 	export let canSort = true;
+	export let canFilter = true;
 
 	const dispatch = createEventDispatcher();
 
@@ -14,6 +15,7 @@
 	// Get current sort state
 	$: currentSort = column.getIsSorted();
 	$: canSortColumn = canSort && column.getCanSort();
+	$: canFilterColumn = canFilter;
 
 	function handleSortAsc() {
 		dispatch('sort', { direction: 'asc' });
@@ -22,6 +24,11 @@
 
 	function handleSortDesc() {
 		dispatch('sort', { direction: 'desc' });
+		dispatch('close');
+	}
+
+	function handleFilter() {
+		dispatch('filter');
 		dispatch('close');
 	}
 
@@ -124,6 +131,31 @@
 				{#if currentSort === 'desc'}
 					<span class="check-icon">✓</span>
 				{/if}
+			</button>
+
+			<div class="menu-divider"></div>
+		{/if}
+
+		<!-- Filter by this field -->
+		{#if canFilterColumn}
+			<button class="menu-item" on:click={handleFilter}>
+				<svg
+					class="menu-icon"
+					width="16"
+					height="16"
+					viewBox="0 0 16 16"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						d="M2 3h12M4 6h8M6 9h4M7 12h2"
+						stroke="currentColor"
+						stroke-width="1.5"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					/>
+				</svg>
+				<span>Filter by this field</span>
 			</button>
 
 			<div class="menu-divider"></div>

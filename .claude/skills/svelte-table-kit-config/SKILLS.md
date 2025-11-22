@@ -59,6 +59,8 @@ npm install @tanstack/svelte-table
 
 ## Programmatic Configuration
 
+### Static Configuration
+
 Set initial table state via `config` prop:
 
 ```svelte
@@ -66,19 +68,101 @@ Set initial table state via `config` prop:
   {data}
   {columns}
   config={{
-    defaultColumnOrder: ['email', 'name', 'role', 'id'],  // Specify column order
-    defaultColumnSizing: { name: 200, email: 250 },        // Set column widths
-    defaultVisibleColumns: ['name', 'email', 'role']       // Hide specific columns
+    id: 'my-view-v1',
+    version: '1.0',
+    defaultColumnOrder: ['email', 'name', 'role', 'id'],
+    defaultColumnSizing: { name: 200, email: 250 },
+    defaultVisibleColumns: ['name', 'email', 'role'],
+    defaultFilters: [
+      { id: 'f1', field: 'role', operator: 'equals', value: 'Admin' }
+    ],
+    defaultSorting: [
+      { columnId: 'name', direction: 'asc' }
+    ],
+    filterLogic: 'and'
   }}
 />
 ```
 
 **Config Properties:**
+- `id` - Unique identifier for this config (required)
+- `version` - Config version string (required)
 - `defaultColumnOrder` - Array of column IDs defining display order
 - `defaultColumnSizing` - Object mapping column IDs to pixel widths
 - `defaultVisibleColumns` - Array of column IDs to show (others hidden)
+- `defaultFilters` - Array of FilterCondition objects
+- `defaultSorting` - Array of sort configurations
+- `filterLogic` - 'and' or 'or' for combining filters
 
-Priority: localStorage (if enabled) > config defaults > natural column order
+### Reactive Configuration (v0.4.0+)
+
+**The `config` prop is fully reactive** - updating it dynamically changes table state without remounting:
+
+```svelte
+<script lang="ts">
+  import { TableKit } from '@shotleybuilder/svelte-table-kit';
+
+  let tableConfig = $state({
+    id: 'query-1',
+    version: '1.0',
+    defaultFilters: [
+      { id: 'f1', field: 'status', operator: 'equals', value: 'active' }
+    ]
+  });
+
+  function updateQuery() {
+    // Table updates automatically when config changes
+    tableConfig = {
+      id: 'query-2',  // New ID triggers config application
+      version: '1.0',
+      defaultFilters: [
+        { id: 'f1', field: 'status', operator: 'equals', value: 'pending' }
+      ]
+    };
+  }
+</script>
+
+<button on:click={updateQuery}>Update Filters</button>
+<TableKit {data} {columns} config={tableConfig} persistState={false} />
+```
+
+**Key Behaviors:**
+- Config changes detected by comparing `config.id`
+- New `id` value triggers full config reapplication
+- User changes (manual filters, resizing) are discarded when config updates
+- Set `persistState={false}` to prevent localStorage conflicts
+
+### AI-Driven Configuration
+
+Generate and apply table configs dynamically from natural language:
+
+```svelte
+<script lang="ts">
+  let aiConfig = $state(undefined);
+
+  async function queryWithAI(prompt: string) {
+    const response = await fetch('/api/nl-query', {
+      method: 'POST',
+      body: JSON.stringify({ prompt })
+    });
+
+    aiConfig = await response.json();  // Table updates automatically
+  }
+</script>
+
+<input
+  type="text"
+  placeholder="Ask a question..."
+  on:submit={(e) => queryWithAI(e.target.value)}
+/>
+
+<TableKit {data} {columns} config={aiConfig} persistState={false} />
+```
+
+**Priority Rules:**
+- When `config` is provided: Config takes precedence, localStorage ignored
+- When `config` is `undefined`: Falls back to localStorage (if `persistState={true}`)
+- When `config` is removed: Reverts to localStorage state
 
 ## Column Context Menu
 
@@ -479,6 +563,21 @@ applyConfig(config);
 
 ## Troubleshooting
 
+**Config changes not applying:**
+- Ensure `config.id` changes when updating config (required for change detection)
+- Set `persistState={false}` when using reactive config
+- Check `config.id` and `config.version` are present (required fields)
+
+**Table not updating with new config:**
+- Verify `config.id` is different from previous config
+- Ensure config object reference changes (create new object, don't mutate)
+- Check browser console for errors
+
+**Config conflicts with localStorage:**
+- Set `persistState={false}` when using `config` prop
+- Clear localStorage manually: `localStorage.clear()` or remove specific key
+- When config is active, localStorage is automatically ignored
+
 **FilterBar not showing:**
 - Verify `features.filtering !== false`
 - Check columns have `accessorKey` or `id`
@@ -501,6 +600,7 @@ applyConfig(config);
 - Check `persistState={true}` is set
 - Verify `storageKey` is unique per table
 - Check browser localStorage is enabled
+- Ensure `config` prop is not set (config disables persistence)
 
 **Group rows not rendering:**
 - Ensure `getGroupedRowModel()` is enabled (automatic when grouping feature enabled)

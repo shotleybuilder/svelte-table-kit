@@ -58,6 +58,7 @@ export interface TableConfig {
 
 	// Filter configuration
 	defaultFilters?: FilterCondition[];
+	filterLogic?: FilterLogic;
 
 	// Sort configuration
 	defaultSorting?: SortConfig[];

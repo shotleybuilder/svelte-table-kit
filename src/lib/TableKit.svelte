@@ -71,32 +71,90 @@
 	export let onRowSelect: TableKitProps<T>['onRowSelect'] = undefined;
 	export let onStateChange: TableKitProps<T>['onStateChange'] = undefined;
 
-	// State stores
+	// State stores - Initialize as empty, will be populated by reactive statements
 	let sorting = writable<SortingState>([]);
-	let columnVisibility = writable<VisibilityState>(
-		persistState && storageKey ? loadColumnVisibility(storageKey) : {}
-	);
-	let columnSizing = writable<ColumnSizingState>(
-		persistState && storageKey ? loadColumnSizing(storageKey) : {}
-	);
-	let columnFilters = writable<ColumnFiltersState>(
-		persistState && storageKey ? loadColumnFilters(storageKey) : []
-	);
-	let columnOrder = writable<ColumnOrderState>(
-		persistState && storageKey
-			? loadColumnOrder(storageKey)
-			: config?.defaultColumnOrder || []
-	);
+	let columnVisibility = writable<VisibilityState>({});
+	let columnSizing = writable<ColumnSizingState>({});
+	let columnFilters = writable<ColumnFiltersState>([]);
+	let columnOrder = writable<ColumnOrderState>([]);
 
 	// Custom filter conditions store (our FilterBar component)
 	let filterConditions = writable<FilterCondition[]>([]);
 	let filterLogic = writable<FilterLogic>('and');
 	let filterBarExpanded = false;
 
+	// Track previous config ID to detect config changes
+	let previousConfigId = config?.id;
+	let configInitialized = false;
+
 	// Grouping state stores
 	let grouping = writable<GroupingState>([]);
 	let expanded = writable<ExpandedState>(true); // Default to expanded
 	let groupBarExpanded = false;
+
+	// Reactive config application - Apply config when it changes
+	$: {
+		// Detect if config has changed by comparing IDs
+		const configChanged = config?.id && config.id !== previousConfigId;
+		const hasConfig = config !== undefined && config !== null;
+
+		if (hasConfig && config && (configChanged || !configInitialized)) {
+			// Config is active and has changed - apply all config properties
+
+			// Apply column order
+			if (config.defaultColumnOrder && config.defaultColumnOrder.length > 0) {
+				columnOrder.set(config.defaultColumnOrder);
+			}
+
+			// Apply column visibility
+			if (config.defaultVisibleColumns && columns.length > 0) {
+				const visibilityMap: VisibilityState = {};
+				columns.forEach((col) => {
+					const colId = (col.accessorKey || col.id) as string;
+					if (config && config.defaultVisibleColumns) {
+						visibilityMap[colId] = config.defaultVisibleColumns.includes(colId);
+					}
+				});
+				columnVisibility.set(visibilityMap);
+			}
+
+			// Apply sorting
+			if (config.defaultSorting) {
+				sorting.set(config.defaultSorting);
+			}
+
+			// Apply filter conditions
+			if (config.defaultFilters) {
+				filterConditions.set(config.defaultFilters);
+			}
+
+			// Apply filter logic
+			if (config.filterLogic) {
+				filterLogic.set(config.filterLogic);
+			}
+
+			// Apply column sizing if provided
+			if (config.defaultColumnSizing) {
+				columnSizing.set(config.defaultColumnSizing);
+			}
+
+			// Update tracking
+			previousConfigId = config.id;
+			configInitialized = true;
+
+		} else if (!hasConfig && persistState && storageKey && !configInitialized) {
+			// No config - load from localStorage on initial mount only
+			columnOrder.set(loadColumnOrder(storageKey) || []);
+			columnVisibility.set(loadColumnVisibility(storageKey) || {});
+			columnSizing.set(loadColumnSizing(storageKey) || {});
+			columnFilters.set(loadColumnFilters(storageKey) || []);
+
+			configInitialized = true;
+		} else if (!hasConfig && !configInitialized) {
+			// No config and no persistence - just mark as initialized
+			configInitialized = true;
+		}
+	}
 
 	// Compute horizontal padding (column spacing)
 	$: horizontalPadding = columnSpacing === 'narrow' ? 0.5 : columnSpacing === 'wide' ? 2.0 : 1.0;
@@ -112,11 +170,18 @@
 	$: filteredData = applyFilters(data, $filterConditions, $filterLogic);
 
 	// Save state to localStorage when it changes
-	$: if (persistState && storageKey && isBrowser) {
-		saveColumnVisibility(storageKey, $columnVisibility);
-		saveColumnSizing(storageKey, $columnSizing);
-		saveColumnFilters(storageKey, $columnFilters);
-		saveColumnOrder(storageKey, $columnOrder);
+	// IMPORTANT: Only persist when config is NOT active - this prevents localStorage
+	// from overriding AI-generated config on remount
+	$: {
+		const hasActiveConfig = config !== undefined && config !== null;
+		const shouldPersist = persistState && !hasActiveConfig && storageKey && isBrowser;
+
+		if (shouldPersist) {
+			saveColumnVisibility(storageKey, $columnVisibility);
+			saveColumnSizing(storageKey, $columnSizing);
+			saveColumnFilters(storageKey, $columnFilters);
+			saveColumnOrder(storageKey, $columnOrder);
+		}
 	}
 
 	// Column picker visibility

@@ -66,6 +66,7 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 **AI-Ready:**
 - 🤖 JSON-schema driven configuration
 - 🧠 AI agents can generate table configs from natural language
+- ⚡ **Reactive config prop** - Update table state dynamically without remounting (v0.5.0+)
 - 📋 Preset configurations for common use cases
 - 🔧 Programmatic table setup and state management
 
@@ -135,9 +136,18 @@ Customize initial table state programmatically:
   {data}
   {columns}
   config={{
-    defaultColumnOrder: ['name', 'role', 'age', 'id'],  // Set initial column order
-    defaultColumnSizing: { name: 200, role: 150 },      // Set initial column widths
-    defaultVisibleColumns: ['name', 'role', 'age']      // Hide 'id' column initially
+    id: 'my-view-v1',
+    version: '1.0',
+    defaultColumnOrder: ['name', 'role', 'age', 'id'],
+    defaultColumnSizing: { name: 200, role: 150 },
+    defaultVisibleColumns: ['name', 'role', 'age'],
+    defaultFilters: [
+      { id: 'f1', field: 'role', operator: 'equals', value: 'Developer' }
+    ],
+    defaultSorting: [
+      { columnId: 'name', direction: 'asc' }
+    ],
+    filterLogic: 'and'
   }}
   features={{
     columnVisibility: true,
@@ -147,6 +157,66 @@ Customize initial table state programmatically:
   }}
 />
 ```
+
+### Reactive Configuration (v0.5.0+)
+
+**The `config` prop is fully reactive** - update it dynamically to change table state without remounting:
+
+```svelte
+<script>
+  import { TableKit } from '@shotleybuilder/svelte-table-kit';
+
+  let tableConfig = $state({
+    id: 'query-1',
+    version: '1.0',
+    defaultFilters: [
+      { id: 'f1', field: 'status', operator: 'equals', value: 'active' }
+    ]
+  });
+
+  // Update config - table reacts automatically
+  function showPendingItems() {
+    tableConfig = {
+      id: 'query-2',  // New ID triggers update
+      version: '1.0',
+      defaultFilters: [
+        { id: 'f1', field: 'status', operator: 'equals', value: 'pending' }
+      ]
+    };
+  }
+</script>
+
+<button on:click={showPendingItems}>Show Pending</button>
+<TableKit {data} {columns} config={tableConfig} persistState={false} />
+```
+
+**Perfect for AI-driven tables:**
+
+```svelte
+<script>
+  let aiConfig = $state(undefined);
+
+  async function askAI(question) {
+    const response = await fetch('/api/nl-query', {
+      method: 'POST',
+      body: JSON.stringify({ question })
+    });
+    aiConfig = await response.json();  // Table updates automatically
+  }
+</script>
+
+<input
+  placeholder="Ask a question about the data..."
+  on:submit={(e) => askAI(e.target.value)}
+/>
+<TableKit {data} {columns} config={aiConfig} persistState={false} />
+```
+
+**Key Points:**
+- Config changes detected by comparing `config.id`
+- Set `persistState={false}` to prevent localStorage conflicts
+- When config is active, localStorage is automatically ignored
+- No `{#key}` blocks needed - updates are smooth and instant
 
 ### Feature Flags
 
@@ -225,10 +295,10 @@ TableKit is headless by default. You can:
 |------|------|---------|-------------|
 | `data` | `T[]` | `[]` | Table data array |
 | `columns` | `ColumnDef<T>[]` | `[]` | Column definitions |
-| `config` | `TableConfig` | `undefined` | AI-generated or preset config |
+| `config` | `TableConfig` | `undefined` | Reactive table configuration (requires `id` and `version`) |
 | `features` | `TableFeatures` | All enabled | Feature flags |
 | `storageKey` | `string` | `undefined` | LocalStorage key for persistence |
-| `persistState` | `boolean` | `true` | Enable state persistence |
+| `persistState` | `boolean` | `true` | Enable state persistence (auto-disabled when config is active) |
 | `theme` | `'light' \| 'dark' \| 'auto'` | `'light'` | Theme mode |
 | `align` | `'left' \| 'center' \| 'right'` | `'left'` | Column text alignment |
 | `rowHeight` | `'short' \| 'medium' \| 'tall' \| 'extra_tall'` | `'medium'` | Row height preset |
@@ -236,6 +306,25 @@ TableKit is headless by default. You can:
 | `onRowClick` | `(row: T) => void` | `undefined` | Row click handler |
 | `onRowSelect` | `(rows: T[]) => void` | `undefined` | Row selection handler |
 | `onStateChange` | `(state: TableState) => void` | `undefined` | State change handler |
+
+### TableConfig Type
+
+```typescript
+interface TableConfig {
+  id: string;                              // Required: Unique identifier for change detection
+  version: string;                         // Required: Config version
+  defaultColumnOrder?: string[];           // Column IDs in display order
+  defaultColumnSizing?: Record<string, number>;  // Column widths in pixels
+  defaultVisibleColumns?: string[];        // Visible column IDs (others hidden)
+  defaultFilters?: FilterCondition[];      // Initial filter conditions
+  defaultSorting?: SortConfig[];           // Initial sort configuration
+  filterLogic?: 'and' | 'or';              // Filter combination logic
+  pagination?: {
+    pageSize: number;
+    pageSizeOptions?: number[];
+  };
+}
+```
 
 ---
 

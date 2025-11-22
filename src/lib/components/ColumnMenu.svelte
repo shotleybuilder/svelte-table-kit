@@ -7,6 +7,7 @@
 	export let isOpen = false;
 	export let canSort = true;
 	export let canFilter = true;
+	export let canGroup = true;
 
 	const dispatch = createEventDispatcher();
 
@@ -16,6 +17,7 @@
 	$: currentSort = column.getIsSorted();
 	$: canSortColumn = canSort && column.getCanSort();
 	$: canFilterColumn = canFilter;
+	$: canGroupColumn = canGroup;
 
 	function handleSortAsc() {
 		dispatch('sort', { direction: 'asc' });
@@ -29,6 +31,11 @@
 
 	function handleFilter() {
 		dispatch('filter');
+		dispatch('close');
+	}
+
+	function handleGroup() {
+		dispatch('group');
 		dispatch('close');
 	}
 
@@ -156,6 +163,31 @@
 					/>
 				</svg>
 				<span>Filter by this field</span>
+			</button>
+
+			<div class="menu-divider"></div>
+		{/if}
+
+		<!-- Group by this field -->
+		{#if canGroupColumn}
+			<button class="menu-item" on:click={handleGroup}>
+				<svg
+					class="menu-icon"
+					width="16"
+					height="16"
+					viewBox="0 0 16 16"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						d="M2 4h12M4 8h8M6 12h4"
+						stroke="currentColor"
+						stroke-width="1.5"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					/>
+				</svg>
+				<span>Group by this field</span>
 			</button>
 
 			<div class="menu-divider"></div>

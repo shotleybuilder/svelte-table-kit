@@ -4,18 +4,24 @@
 	export let columns: ColumnDef<any>[];
 	export let grouping: string[] = [];
 	export let onGroupingChange: (grouping: string[]) => void;
+	export let isExpanded = false;
+	export let onExpandedChange: ((expanded: boolean) => void) | undefined = undefined;
 
 	// Maximum group levels (like Airtable)
 	const MAX_LEVELS = 3;
 
-	// Collapsible state
-	let isExpanded = false;
+	function setExpanded(value: boolean) {
+		isExpanded = value;
+		if (onExpandedChange) {
+			onExpandedChange(value);
+		}
+	}
 
 	function addGroup() {
 		if (grouping.length >= MAX_LEVELS) return;
 		// Add empty group
 		onGroupingChange([...grouping, '']);
-		isExpanded = true;
+		setExpanded(true);
 	}
 
 	function updateGroup(index: number, columnId: string) {
@@ -29,13 +35,13 @@
 		onGroupingChange(newGrouping);
 		// Auto-collapse if no groups left
 		if (newGrouping.length === 0) {
-			isExpanded = false;
+			setExpanded(false);
 		}
 	}
 
 	function clearAllGroups() {
 		onGroupingChange([]);
-		isExpanded = false;
+		setExpanded(false);
 	}
 
 	// Get available columns that can be grouped
@@ -51,7 +57,7 @@
 
 <div class="group-bar">
 	<!-- Compact Group Button -->
-	<button class="group-toggle-btn" on:click={() => (isExpanded = !isExpanded)}>
+	<button class="group-toggle-btn" on:click={() => setExpanded(!isExpanded)}>
 		<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
 				stroke-linecap="round"

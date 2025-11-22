@@ -93,6 +93,7 @@
 	// Grouping state stores
 	let grouping = writable<GroupingState>([]);
 	let expanded = writable<ExpandedState>(true); // Default to expanded
+	let groupBarExpanded = false;
 
 	// Compute horizontal padding (column spacing)
 	$: horizontalPadding = columnSpacing === 'narrow' ? 0.5 : columnSpacing === 'wide' ? 2.0 : 1.0;
@@ -138,6 +139,22 @@
 		};
 		filterConditions.update((conditions) => [...conditions, newCondition]);
 		filterBarExpanded = true;
+	}
+
+	// Add a group for a specific column
+	function addGroupForColumn(columnId: string) {
+		grouping.update((groups) => {
+			// Check if column is already in grouping
+			if (groups.includes(columnId)) {
+				return groups;
+			}
+			// Check max levels (3)
+			if (groups.length >= 3) {
+				return groups;
+			}
+			return [...groups, columnId];
+		});
+		groupBarExpanded = true;
 	}
 
 	function updateColumnPickerPosition() {
@@ -358,6 +375,8 @@
 						{columns}
 						grouping={$grouping}
 						onGroupingChange={(newGrouping) => grouping.set(newGrouping)}
+						isExpanded={groupBarExpanded}
+						onExpandedChange={(expanded) => (groupBarExpanded = expanded)}
 					/>
 				</div>
 			{/if}
@@ -678,6 +697,7 @@
 												isOpen={openColumnMenuId === header.column.id}
 												canSort={features.sorting !== false}
 												canFilter={features.filtering !== false}
+												canGroup={features.grouping !== false}
 												on:sort={(e) => {
 													const direction = e.detail.direction;
 													header.column.toggleSorting(direction === 'desc');
@@ -685,6 +705,10 @@
 												}}
 												on:filter={() => {
 													addFilterForColumn(header.column.id);
+													openColumnMenuId = null;
+												}}
+												on:group={() => {
+													addGroupForColumn(header.column.id);
 													openColumnMenuId = null;
 												}}
 												on:hide={() => {

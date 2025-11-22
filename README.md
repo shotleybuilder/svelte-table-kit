@@ -23,6 +23,7 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - 📄 Pagination with customizable page sizes
 - 💾 LocalStorage persistence for all user preferences
 - ✂️ Text truncation with ellipsis for long content
+- 📋 **Column context menu** - Quick access to sort, filter, group, and hide actions
 
 **Advanced Filtering:**
 - 12 filter operators: equals, contains, starts with, greater than, etc.
@@ -44,6 +45,15 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - Visual indentation based on nesting level
 - Item count per group
 - Collapsible GroupBar UI
+
+**Column Context Menu:**
+- Hover over column headers to reveal menu trigger (chevron icon)
+- **Sort A → Z / Sort Z → A** - Quick sort with active state indication
+- **Filter by this field** - Creates pre-filled filter condition
+- **Group by this field** - Adds column to grouping configuration
+- **Hide field** - Remove column from view
+- Actions conditionally shown based on feature flags
+- Seamlessly integrates with existing controls
 
 **Developer Experience:**
 - 🎨 Headless design - style it your way

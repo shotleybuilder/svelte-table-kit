@@ -118,7 +118,8 @@
 			<h2>✨ Full-Featured Example</h2>
 			<p class="description">
 				Try column resizing (drag borders), reordering (drag headers), Airtable-style sorting (Sort button),
-				filtering (Filter button), row height and column spacing controls (toolbar buttons), and column visibility (Columns button)
+				filtering (Filter button), row height and column spacing controls (toolbar buttons), and column visibility (Columns button).
+				Note: Columns are displayed in a custom order (Organization, Type, Status, Date, Description, Fine) via config.defaultColumnOrder.
 			</p>
 
 			<TableKit
@@ -129,6 +130,9 @@
 				storageKey="example-table-v4"
 				onRowClick={handleRowClick}
 				align="left"
+				config={{
+					defaultColumnOrder: ['organization', 'type', 'status', 'date', 'description', 'fine_amount']
+				}}
 				features={{
 					columnVisibility: true,
 					columnResizing: true,

@@ -1,6 +1,6 @@
 ---
 name: svelte-table-kit-config
-description: Configures @shotleybuilder/svelte-table-kit with advanced filtering (12 operators, AND/OR logic), multi-level grouping (up to 3 levels), sorting, pagination, column controls (resizing, reordering, visibility), row height & column spacing adjustments, and text truncation. Use when implementing Airtable-like tables in Svelte, when users request table features, or when building data-heavy UIs with complex filtering and grouping requirements.
+description: Configures @shotleybuilder/svelte-table-kit with Airtable-style column context menus, programmatic column ordering, advanced filtering (12 operators, AND/OR logic), multi-level grouping (up to 3 levels), sorting modes, pagination, column controls (resizing, reordering, visibility), row height & column spacing, and text truncation. Use when implementing Airtable-like tables in Svelte, when users request table features, or when building data-heavy UIs with complex filtering and grouping requirements.
 ---
 
 # Svelte Table Kit Configuration
@@ -11,6 +11,8 @@ Configure production-ready tables with Airtable-like features using TanStack Tab
 
 - [Installation](#installation)
 - [Basic Setup](#basic-setup)
+- [Programmatic Configuration](#programmatic-configuration)
+- [Column Context Menu](#column-context-menu)
 - [Sorting](#sorting)
 - [Advanced Filtering](#advanced-filtering)
 - [Multi-Level Grouping](#multi-level-grouping)
@@ -54,6 +56,54 @@ npm install @tanstack/svelte-table
 
 <TableKit {data} {columns} />
 ```
+
+## Programmatic Configuration
+
+Set initial table state via `config` prop:
+
+```svelte
+<TableKit
+  {data}
+  {columns}
+  config={{
+    defaultColumnOrder: ['email', 'name', 'role', 'id'],  // Specify column order
+    defaultColumnSizing: { name: 200, email: 250 },        // Set column widths
+    defaultVisibleColumns: ['name', 'email', 'role']       // Hide specific columns
+  }}
+/>
+```
+
+**Config Properties:**
+- `defaultColumnOrder` - Array of column IDs defining display order
+- `defaultColumnSizing` - Object mapping column IDs to pixel widths
+- `defaultVisibleColumns` - Array of column IDs to show (others hidden)
+
+Priority: localStorage (if enabled) > config defaults > natural column order
+
+## Column Context Menu
+
+Hover column headers to reveal chevron (↓) triggering Airtable-style menu:
+
+```svelte
+<TableKit
+  {data}
+  {columns}
+  features={{
+    sorting: true,    // Enables Sort A → Z / Z → A actions
+    filtering: true,  // Enables Filter by this field action
+    grouping: true    // Enables Group by this field action
+  }}
+/>
+```
+
+**Menu Actions:**
+- **Sort A → Z** - Sort ascending with active state indicator
+- **Sort Z → A** - Sort descending with active state indicator
+- **Filter by this field** - Creates pre-filled filter condition, expands FilterBar
+- **Group by this field** - Adds column to grouping, expands GroupBar
+- **Hide field** - Hides column (restore via column picker)
+
+Actions conditionally render based on feature flags.
 
 ## Sorting
 

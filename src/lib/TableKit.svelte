@@ -50,6 +50,7 @@
 	export let columns: TableKitProps<T>['columns'] = [];
 
 	// Optional props with defaults
+	export let config: TableKitProps<T>['config'] = undefined;
 	export let storageKey: TableKitProps<T>['storageKey'] = 'table-kit';
 	export let persistState: TableKitProps<T>['persistState'] = true;
 	export let align: TableKitProps<T>['align'] = 'left';
@@ -82,7 +83,9 @@
 		persistState && storageKey ? loadColumnFilters(storageKey) : []
 	);
 	let columnOrder = writable<ColumnOrderState>(
-		persistState && storageKey ? loadColumnOrder(storageKey) : []
+		persistState && storageKey
+			? loadColumnOrder(storageKey)
+			: config?.defaultColumnOrder || []
 	);
 
 	// Custom filter conditions store (our FilterBar component)

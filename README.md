@@ -124,19 +124,21 @@ The simplest way to use TableKit:
 
 ### With Configuration
 
-Use AI-generated or predefined configurations:
+Customize initial table state programmatically:
 
 ```svelte
 <script>
-  import { TableKit, presets } from '@shotleybuilder/svelte-table-kit';
-
-  const config = presets.dashboard; // or generate with AI
+  import { TableKit } from '@shotleybuilder/svelte-table-kit';
 </script>
 
 <TableKit
   {data}
   {columns}
-  {config}
+  config={{
+    defaultColumnOrder: ['name', 'role', 'age', 'id'],  // Set initial column order
+    defaultColumnSizing: { name: 200, role: 150 },      // Set initial column widths
+    defaultVisibleColumns: ['name', 'role', 'age']      // Hide 'id' column initially
+  }}
   features={{
     columnVisibility: true,
     filtering: true,

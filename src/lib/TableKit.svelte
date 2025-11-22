@@ -41,6 +41,7 @@
 	import FilterBar from './components/FilterBar.svelte';
 	import GroupBar from './components/GroupBar.svelte';
 	import SortBar from './components/SortBar.svelte';
+	import ColumnMenu from './components/ColumnMenu.svelte';
 
 	type T = $$Generic;
 
@@ -117,6 +118,9 @@
 	let showColumnPicker = false;
 	let columnPickerButton: HTMLElement | null = null;
 	let columnPickerPosition = { top: 0, left: 0 };
+
+	// Column menu state - track which column's menu is open
+	let openColumnMenuId: string | null = null;
 
 	function updateColumnPickerPosition() {
 		if (columnPickerButton && showColumnPicker) {
@@ -585,40 +589,87 @@
 									style="width: {header.getSize()}px;"
 								>
 									{#if !header.isPlaceholder}
-										<div
-											class="th-content"
-											style="padding: {verticalPadding}rem {horizontalPadding}rem; cursor: {features.columnReordering !==
-											false
-												? 'grab'
-												: 'default'};"
-											draggable={features.columnReordering !== false}
-											on:dragstart={() => handleDragStart(header.column.id)}
-										>
-											{#if features.sorting !== false && features.sortingMode !== 'control' && header.column.getCanSort()}
-												<button
-													class="sort-btn"
-													class:sortable={header.column.getCanSort()}
-													on:click={header.column.getToggleSortingHandler()}
-												>
+										<div class="th-wrapper">
+											<div
+												class="th-content"
+												style="padding: {verticalPadding}rem {horizontalPadding}rem; cursor: {features.columnReordering !==
+												false
+													? 'grab'
+													: 'default'};"
+												draggable={features.columnReordering !== false}
+												on:dragstart={() => handleDragStart(header.column.id)}
+											>
+												{#if features.sorting !== false && features.sortingMode !== 'control' && header.column.getCanSort()}
+													<button
+														class="sort-btn"
+														class:sortable={header.column.getCanSort()}
+														on:click={header.column.getToggleSortingHandler()}
+													>
+														<span class="header-text">
+															<svelte:component
+																this={flexRender(header.column.columnDef.header, header.getContext())}
+															/>
+														</span>
+														<span class="sort-icon">
+															{{
+																asc: '↑',
+																desc: '↓'
+															}[header.column.getIsSorted()] ?? '↕'}
+														</span>
+													</button>
+												{:else}
 													<span class="header-text">
 														<svelte:component
 															this={flexRender(header.column.columnDef.header, header.getContext())}
 														/>
 													</span>
-													<span class="sort-icon">
-														{{
-															asc: '↑',
-															desc: '↓'
-														}[header.column.getIsSorted()] ?? '↕'}
-													</span>
+												{/if}
+
+												<!-- Column Menu Trigger -->
+												<button
+													class="column-menu-trigger"
+													on:click|stopPropagation={() => {
+														openColumnMenuId =
+															openColumnMenuId === header.column.id ? null : header.column.id;
+													}}
+													aria-label="Column options"
+												>
+													<svg
+														width="12"
+														height="12"
+														viewBox="0 0 12 12"
+														fill="none"
+														xmlns="http://www.w3.org/2000/svg"
+													>
+														<path
+															d="M3 5L6 8L9 5"
+															stroke="currentColor"
+															stroke-width="1.5"
+															stroke-linecap="round"
+															stroke-linejoin="round"
+														/>
+													</svg>
 												</button>
-											{:else}
-												<span class="header-text">
-													<svelte:component
-														this={flexRender(header.column.columnDef.header, header.getContext())}
-													/>
-												</span>
-											{/if}
+											</div>
+
+											<!-- Column Menu -->
+											<ColumnMenu
+												column={header.column}
+												isOpen={openColumnMenuId === header.column.id}
+												canSort={features.sorting !== false}
+												on:sort={(e) => {
+													const direction = e.detail.direction;
+													header.column.toggleSorting(direction === 'desc');
+													openColumnMenuId = null;
+												}}
+												on:hide={() => {
+													header.column.toggleVisibility(false);
+													openColumnMenuId = null;
+												}}
+												on:close={() => {
+													openColumnMenuId = null;
+												}}
+											/>
 										</div>
 										<!-- Resize Handle -->
 										{#if features.columnResizing !== false && header.column.getCanResize()}
@@ -1119,6 +1170,39 @@
 
 	.sort-icon {
 		color: #9ca3af;
+	}
+
+	.th-wrapper {
+		position: relative;
+		display: flex;
+		align-items: center;
+		width: 100%;
+	}
+
+	.column-menu-trigger {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.25rem;
+		margin-left: 0.25rem;
+		background: transparent;
+		border: none;
+		border-radius: 0.25rem;
+		cursor: pointer;
+		color: #9ca3af;
+		transition: all 0.15s;
+		opacity: 0;
+	}
+
+	.th-wrapper:hover .column-menu-trigger,
+	.column-menu-trigger:focus {
+		opacity: 1;
+	}
+
+	.column-menu-trigger:hover {
+		background-color: #f3f4f6;
+		color: #374151;
 	}
 
 	.resize-handle {

@@ -118,9 +118,13 @@
 				columnVisibility.set(visibilityMap);
 			}
 
-			// Apply sorting
+			// Apply sorting - transform SortConfig to TanStack Table's SortingState format
 			if (config.defaultSorting) {
-				sorting.set(config.defaultSorting);
+				const tanstackSorting = config.defaultSorting.map((sort) => ({
+					id: sort.columnId,
+					desc: sort.direction === 'desc'
+				}));
+				sorting.set(tanstackSorting);
 			}
 
 			// Apply filter conditions

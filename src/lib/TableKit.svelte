@@ -414,6 +414,11 @@
 	<!-- Filters and Controls -->
 	{#if features.filtering !== false || features.grouping !== false || features.columnVisibility !== false || (features.sorting !== false && features.sortingMode === 'control')}
 		<div class="table-kit-toolbar">
+			<!-- Slot for custom left-side controls (e.g., view selector, save buttons) -->
+			<div class="table-kit-custom-controls">
+				<slot name="toolbar-left" />
+			</div>
+
 			<!-- Filter Controls -->
 			{#if features.filtering !== false}
 				<div class="table-kit-filters">
@@ -961,6 +966,16 @@
 		justify-content: space-between;
 		gap: 1rem;
 		margin-bottom: 1rem;
+		flex-wrap: wrap;
+	}
+
+	/* Custom controls slot (left side) */
+	.table-kit-custom-controls {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-shrink: 0;
+		margin-right: auto;
 	}
 
 	.table-kit-filters {

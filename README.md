@@ -60,6 +60,7 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - 📦 Built on TanStack Table v8 (battle-tested, powerful)
 - 🔒 Full TypeScript support
 - 🎛️ Feature flags for granular control
+- 🔌 **Toolbar slot** - Add custom controls to the toolbar (v0.6.0+)
 - 🚀 Zero external dependencies (except TanStack Table)
 - ♿ Accessible and keyboard-friendly
 
@@ -257,6 +258,36 @@ Listen to table events:
   onStateChange={(state) => console.log('State:', state)}
 />
 ```
+
+### Custom Toolbar Controls (v0.6.0+)
+
+Add custom controls to the left side of the toolbar using the `toolbar-left` slot:
+
+```svelte
+<script>
+  import { TableKit } from '@shotleybuilder/svelte-table-kit';
+  import ViewSelector from './ViewSelector.svelte';
+</script>
+
+<TableKit {data} {columns}>
+  <!-- Add custom controls to the toolbar -->
+  <svelte:fragment slot="toolbar-left">
+    <ViewSelector on:viewSelected={handleViewSelected} />
+    <button on:click={saveView} class="btn-primary">
+      Save View
+    </button>
+  </svelte:fragment>
+</TableKit>
+```
+
+**Use Cases:**
+- View management controls (save/load table configurations)
+- Custom filter presets
+- Quick action buttons
+- Export/import controls
+- Any custom toolbar buttons that should appear alongside table controls
+
+The `toolbar-left` slot is positioned on the left side of the toolbar, while the built-in table controls (Filter, Sort, Group, Columns) automatically align to the right. All controls appear on the same row, creating a unified control bar.
 
 ---
 

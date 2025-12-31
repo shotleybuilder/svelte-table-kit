@@ -43,6 +43,12 @@ This document outlines the development pipeline for svelte-table-kit, organized 
 - [x] **Filter column order modes** - Cycle between Default, Table Order, and A-Z in filter field picker
 - [x] **Order mode persistence** - Filter column order preference saved per-table
 
+### v0.8.0 - Fuzzy Search
+- [x] **Fuzzy search in filter picker** - Type to quickly find columns with intelligent matching
+- [x] **Match highlighting** - Matched characters highlighted in dropdown results
+- [x] **Keyboard navigation** - Arrow keys, Enter, Escape for efficient selection
+- [x] **Scoring algorithm** - Prioritizes consecutive matches, word boundaries, and start-of-string matches
+
 ---
 
 ## 🚀 Next Release (v0.4.0) - Native TanStack Features
@@ -307,7 +313,13 @@ Want to help implement a feature from the roadmap?
 
 ## 📖 Version History
 
-### v0.7.0 (Current)
+### v0.8.0 (Current)
+- ✅ Fuzzy search in filter field picker
+- ✅ Match highlighting in dropdown results
+- ✅ Keyboard navigation (arrow keys, Enter, Escape)
+- ✅ Intelligent scoring algorithm
+
+### v0.7.0
 - ✅ Filter column order modes (Default, Table Order, A-Z)
 - ✅ Order mode persistence per-table
 

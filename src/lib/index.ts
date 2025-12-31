@@ -40,3 +40,7 @@ export {
 
 // Formatters
 export { formatDate, formatCurrency, formatNumber, formatPercent } from './utils/formatters';
+
+// Fuzzy search utilities
+export { fuzzyMatch, fuzzySearch, highlightMatches } from './utils/fuzzy';
+export type { FuzzyMatch } from './utils/fuzzy';

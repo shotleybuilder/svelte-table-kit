@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **svelte-table-kit** (`@shotleybuilder/svelte-table-kit`) is a comprehensive, AI-configurable data table component library for Svelte and SvelteKit, built on TanStack Table v8. It provides Airtable-like functionality with advanced filtering, multi-level grouping, column controls, and state persistence.
 
-**Current Version:** v0.7.0
+**Current Version:** v0.8.0
 
 ## Development Commands
 
@@ -66,8 +66,10 @@ npm run format                 # Format code with Prettier
 
 **FilterCondition.svelte** - Individual filter condition editor
 - Located: `src/lib/components/FilterCondition.svelte`
-- Dropdown for field selection, operator selection, and value input
+- Custom searchable dropdown for field selection with fuzzy search
 - Column order mode cycling (Default → Table → A-Z) with persistence
+- Keyboard navigation (arrow keys, Enter, Escape)
+- Match highlighting in search results
 
 ### State Management
 
@@ -115,6 +117,11 @@ State is managed via Svelte writable stores for:
 
 **src/lib/utils/formatters.ts**
 - `formatDate()`, `formatCurrency()`, `formatNumber()`, `formatPercent()` - Value formatters
+
+**src/lib/utils/fuzzy.ts**
+- `fuzzyMatch(pattern, target)` - Fuzzy match with scoring and matched indices
+- `fuzzySearch(pattern, items, limit?)` - Search array of strings, returns sorted matches
+- `highlightMatches(text, matchedIndices)` - Split text into segments for highlighting
 
 **src/lib/stores/persistence.ts**
 - `loadColumnVisibility()`, `saveColumnVisibility()` - Persist visibility
@@ -208,7 +215,10 @@ See `ROADMAP.md` for detailed feature planning. Key upcoming features:
 
 - Test framework: Vitest (configured in `vite.config.ts`)
 - Test pattern: `src/**/*.{test,spec}.{js,ts}`
-- No tests currently exist (new project)
+- Existing tests:
+  - `src/lib/stores/persistence.test.ts` - LocalStorage persistence functions
+  - `src/lib/utils/columnOrdering.test.ts` - Column ordering logic
+  - `src/lib/utils/fuzzy.test.ts` - Fuzzy search algorithm
 - When writing tests, use Vitest's Svelte testing utilities
 
 ## Build System

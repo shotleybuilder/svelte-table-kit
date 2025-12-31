@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **svelte-table-kit** (`@shotleybuilder/svelte-table-kit`) is a comprehensive, AI-configurable data table component library for Svelte and SvelteKit, built on TanStack Table v8. It provides Airtable-like functionality with advanced filtering, multi-level grouping, column controls, and state persistence.
 
-**Current Version:** v0.2.0
+**Current Version:** v0.7.0
 
 ## Development Commands
 
@@ -67,6 +67,7 @@ npm run format                 # Format code with Prettier
 **FilterCondition.svelte** - Individual filter condition editor
 - Located: `src/lib/components/FilterCondition.svelte`
 - Dropdown for field selection, operator selection, and value input
+- Column order mode cycling (Default → Table → A-Z) with persistence
 
 ### State Management
 
@@ -95,6 +96,7 @@ State is managed via Svelte writable stores for:
 - `FilterCondition` - Individual filter with field, operator, value
 - `FilterOperator` - Union type for 12+ filter operators
 - `FilterLogic` - 'and' | 'or' for combining conditions
+- `ColumnOrderMode` - 'definition' | 'ui' | 'alphabetical' for filter picker column ordering
 - `TableState` - Complete table state snapshot for persistence
 - `ViewPreset` - Saved table configurations
 - `ClassNameMap` - Custom CSS class names for styling
@@ -121,6 +123,7 @@ State is managed via Svelte writable stores for:
 - `loadColumnOrder()`, `saveColumnOrder()` - Persist order
 - `loadSorting()`, `saveSorting()` - Persist sorting
 - `loadPagination()`, `savePagination()` - Persist pagination
+- `loadFilterColumnOrderMode()`, `saveFilterColumnOrderMode()` - Persist filter picker column order mode
 - `clearTableState()` - Reset all persisted state
 
 ### Exports

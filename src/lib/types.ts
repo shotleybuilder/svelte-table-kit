@@ -101,6 +101,8 @@ export type FilterOperator =
 
 export type FilterLogic = 'and' | 'or';
 
+export type ColumnOrderMode = 'definition' | 'ui' | 'alphabetical';
+
 export interface FilterCondition {
 	id: string;
 	field: string;

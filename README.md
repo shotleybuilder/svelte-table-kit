@@ -31,6 +31,7 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - Collapsible FilterBar UI (space-efficient)
 - Active filter count badge
 - Real-time filtering as you type
+- **Column order modes** - Cycle between Default, Table Order, and A-Z sorting in field picker (v0.7.0+)
 
 **Sorting Options:**
 - **Column header mode** (default) - Click headers to sort with ↑↓↕ indicators

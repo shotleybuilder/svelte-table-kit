@@ -4,6 +4,8 @@
 	import FilterConditionComponent from './FilterCondition.svelte';
 
 	export let columns: ColumnDef<any>[];
+	export let columnOrder: string[] = [];
+	export let storageKey: string = 'table-kit';
 	export let conditions: FilterCondition[] = [];
 	export let onConditionsChange: (conditions: FilterCondition[]) => void;
 	export let logic: FilterLogic = 'and';
@@ -115,6 +117,8 @@
 								<FilterConditionComponent
 									{condition}
 									{columns}
+									{columnOrder}
+									{storageKey}
 									onUpdate={(updated) => updateCondition(index, updated)}
 									onRemove={() => removeCondition(index)}
 								/>

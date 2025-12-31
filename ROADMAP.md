@@ -30,6 +30,19 @@ This document outlines the development pipeline for svelte-table-kit, organized 
 - [x] **Multi-level sorting** - Add multiple sort levels with direction control
 - [x] **Sort persistence** - Sorting state saved to localStorage
 
+### v0.4.0 - Column Context Menu
+- [x] **Column context menu** - Quick access to sort, filter, group, and hide actions from column headers
+
+### v0.5.0 - Reactive Config
+- [x] **Reactive config prop** - Update table state dynamically without remounting
+
+### v0.6.0 - Toolbar Customization
+- [x] **Toolbar slot** - Add custom controls to the toolbar with `toolbar-left` slot
+
+### v0.7.0 - Filter Enhancements
+- [x] **Filter column order modes** - Cycle between Default, Table Order, and A-Z in filter field picker
+- [x] **Order mode persistence** - Filter column order preference saved per-table
+
 ---
 
 ## 🚀 Next Release (v0.4.0) - Native TanStack Features
@@ -294,7 +307,27 @@ Want to help implement a feature from the roadmap?
 
 ## 📖 Version History
 
-### v0.1.0 (Current)
+### v0.7.0 (Current)
+- ✅ Filter column order modes (Default, Table Order, A-Z)
+- ✅ Order mode persistence per-table
+
+### v0.6.0
+- ✅ Toolbar slot for custom controls
+
+### v0.5.0
+- ✅ Reactive config prop for dynamic table updates
+
+### v0.4.0
+- ✅ Column context menu (sort, filter, group, hide)
+
+### v0.3.0
+- ✅ Airtable-style sort control
+- ✅ Multi-level sorting
+
+### v0.2.0
+- ✅ Row height and column spacing controls
+
+### v0.1.0
 - ✅ Core table features (visibility, resizing, reordering, sorting, pagination)
 - ✅ Advanced filtering (12 operators, AND/OR logic)
 - ✅ Multi-level grouping (up to 3 levels)

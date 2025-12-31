@@ -424,6 +424,8 @@
 				<div class="table-kit-filters">
 					<FilterBar
 						{columns}
+						columnOrder={$columnOrder}
+						{storageKey}
 						conditions={$filterConditions}
 						onConditionsChange={(newConditions) => filterConditions.set(newConditions)}
 						logic={$filterLogic}

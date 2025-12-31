@@ -7,6 +7,7 @@ export { default as TableKit } from './TableKit.svelte';
 export { default as FilterBar } from './components/FilterBar.svelte';
 export { default as FilterConditionEditor } from './components/FilterCondition.svelte';
 export { default as GroupBar } from './components/GroupBar.svelte';
+export { default as CellContextMenu } from './components/CellContextMenu.svelte';
 
 // TypeScript types
 export type {

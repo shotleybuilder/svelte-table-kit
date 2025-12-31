@@ -49,6 +49,13 @@ This document outlines the development pipeline for svelte-table-kit, organized 
 - [x] **Keyboard navigation** - Arrow keys, Enter, Escape for efficient selection
 - [x] **Scoring algorithm** - Prioritizes consecutive matches, word boundaries, and start-of-string matches
 
+### v0.9.0 - Quick Filter from Cell
+- [x] **Cell context menu** - Right-click any cell to open context menu
+- [x] **Filter by value** - Create equals filter from cell value
+- [x] **Exclude value** - Create not_equals filter from cell value
+- [x] **Numeric comparisons** - Greater than / Less than options for numeric cells
+- [x] **Auto-expand FilterBar** - FilterBar opens automatically when filter created
+
 ---
 
 ## 🚀 Next Release (v0.4.0) - Native TanStack Features
@@ -313,7 +320,13 @@ Want to help implement a feature from the roadmap?
 
 ## 📖 Version History
 
-### v0.8.0 (Current)
+### v0.9.0 (Current)
+- ✅ Cell context menu (right-click to filter)
+- ✅ Filter by value / Exclude value actions
+- ✅ Numeric comparison options (greater/less than)
+- ✅ Auto-expand FilterBar on filter creation
+
+### v0.8.0
 - ✅ Fuzzy search in filter field picker
 - ✅ Match highlighting in dropdown results
 - ✅ Keyboard navigation (arrow keys, Enter, Escape)

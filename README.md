@@ -57,6 +57,13 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - Actions conditionally shown based on feature flags
 - Seamlessly integrates with existing controls
 
+**Cell Context Menu (v0.9.0+):**
+- Right-click any cell to open context menu
+- **Filter by value** - Instantly filter to show rows matching cell value
+- **Exclude value** - Filter to hide rows with this value
+- **Greater/Less than** - Numeric columns get comparison options
+- Auto-expands FilterBar when filter is created
+
 **Developer Experience:**
 - 🎨 Headless design - style it your way
 - 📦 Built on TanStack Table v8 (battle-tested, powerful)

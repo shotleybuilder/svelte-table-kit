@@ -42,6 +42,7 @@
 	import GroupBar from './components/GroupBar.svelte';
 	import SortBar from './components/SortBar.svelte';
 	import ColumnMenu from './components/ColumnMenu.svelte';
+	import CellContextMenu from './components/CellContextMenu.svelte';
 
 	type T = $$Generic;
 
@@ -91,6 +92,25 @@
 	let grouping = writable<GroupingState>([]);
 	let expanded = writable<ExpandedState>(true); // Default to expanded
 	let groupBarExpanded = false;
+
+	// Cell context menu state
+	let cellContextMenu: {
+		show: boolean;
+		x: number;
+		y: number;
+		value: any;
+		columnId: string;
+		columnHeader: string;
+		isNumeric: boolean;
+	} = {
+		show: false,
+		x: 0,
+		y: 0,
+		value: null,
+		columnId: '',
+		columnHeader: '',
+		isNumeric: false
+	};
 
 	// Reactive config application - Apply config when it changes
 	$: {
@@ -386,6 +406,45 @@
 	// Initialize column order if empty
 	$: if ($columnOrder.length === 0 && columns.length > 0) {
 		columnOrder.set(columns.map((col) => col.accessorKey || col.id) as string[]);
+	}
+
+	// Cell context menu handlers
+	function showCellContextMenu(event: MouseEvent, cell: any) {
+		if (features.filtering === false) return;
+
+		event.preventDefault();
+		const value = cell.getValue();
+		const columnId = cell.column.id;
+		const columnHeader = String(cell.column.columnDef.header || columnId);
+
+		// Detect if value is numeric
+		const isNumeric = typeof value === 'number' || !isNaN(parseFloat(value));
+
+		cellContextMenu = {
+			show: true,
+			x: event.clientX,
+			y: event.clientY,
+			value,
+			columnId,
+			columnHeader,
+			isNumeric
+		};
+	}
+
+	function closeCellContextMenu() {
+		cellContextMenu = { ...cellContextMenu, show: false };
+	}
+
+	function addFilterFromCell(columnId: string, operator: string, value: any) {
+		const newCondition: FilterCondition = {
+			id: generateFilterId(),
+			field: columnId,
+			operator: operator as FilterCondition['operator'],
+			value: String(value ?? '')
+		};
+		filterConditions.update((conditions) => [...conditions, newCondition]);
+		filterBarExpanded = true;
+		closeCellContextMenu();
 	}
 
 	// Check if any filters are active
@@ -879,7 +938,11 @@
 										<!-- Placeholder cell - empty -->
 									{:else}
 										<!-- Normal cell -->
-										<div class="cell-content">
+										<!-- svelte-ignore a11y-no-static-element-interactions -->
+										<div
+											class="cell-content"
+											on:contextmenu={(e) => showCellContextMenu(e, cell)}
+										>
 											<slot name="cell" {cell} column={cell.column.id}>
 												<svelte:component
 													this={flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -953,6 +1016,23 @@
 		{/if}
 	{/if}
 </div>
+
+<!-- Cell Context Menu -->
+{#if cellContextMenu.show}
+	<CellContextMenu
+		x={cellContextMenu.x}
+		y={cellContextMenu.y}
+		value={cellContextMenu.value}
+		columnId={cellContextMenu.columnId}
+		columnHeader={cellContextMenu.columnHeader}
+		isNumeric={cellContextMenu.isNumeric}
+		on:filterEquals={(e) => addFilterFromCell(e.detail.columnId, 'equals', e.detail.value)}
+		on:filterNotEquals={(e) => addFilterFromCell(e.detail.columnId, 'not_equals', e.detail.value)}
+		on:filterGreaterThan={(e) => addFilterFromCell(e.detail.columnId, 'greater_than', e.detail.value)}
+		on:filterLessThan={(e) => addFilterFromCell(e.detail.columnId, 'less_than', e.detail.value)}
+		on:close={closeCellContextMenu}
+	/>
+{/if}
 
 <style>
 	/* Container */

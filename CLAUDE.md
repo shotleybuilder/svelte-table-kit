@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **svelte-table-kit** (`@shotleybuilder/svelte-table-kit`) is a comprehensive, AI-configurable data table component library for Svelte and SvelteKit, built on TanStack Table v8. It provides Airtable-like functionality with advanced filtering, multi-level grouping, column controls, and state persistence.
 
-**Current Version:** v0.8.0
+**Current Version:** v0.9.0
 
 ## Development Commands
 
@@ -70,6 +70,13 @@ npm run format                 # Format code with Prettier
 - Column order mode cycling (Default → Table → A-Z) with persistence
 - Keyboard navigation (arrow keys, Enter, Escape)
 - Match highlighting in search results
+
+**CellContextMenu.svelte** - Right-click context menu for cells
+- Located: `src/lib/components/CellContextMenu.svelte`
+- Filter by value / Exclude value actions
+- Numeric columns get greater than / less than options
+- Auto-positions to stay within viewport
+- Dispatches events handled by TableKit
 
 ### State Management
 

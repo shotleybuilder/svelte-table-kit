@@ -4,6 +4,7 @@
 	import FilterConditionComponent from './FilterCondition.svelte';
 
 	export let columns: ColumnDef<any>[];
+	export let data: any[] = [];
 	export let columnOrder: string[] = [];
 	export let storageKey: string = 'table-kit';
 	export let conditions: FilterCondition[] = [];
@@ -12,6 +13,106 @@
 	export let onLogicChange: (logic: FilterLogic) => void;
 	export let isExpanded = false;
 	export let onExpandedChange: ((expanded: boolean) => void) | undefined = undefined;
+
+	// Cache for unique column values
+	let columnValuesCache: Map<string, string[]> = new Map();
+	// Cache for numeric column ranges
+	let numericRangeCache: Map<string, { min: number; max: number } | null> = new Map();
+	let lastDataLength = 0;
+
+	// Check if a column is numeric
+	function isNumericColumn(columnId: string): boolean {
+		if (!columnId || !data || data.length === 0) return false;
+
+		// Sample first few non-null values to determine type
+		let numericCount = 0;
+		let sampleCount = 0;
+		const sampleSize = Math.min(10, data.length);
+
+		for (const row of data) {
+			if (sampleCount >= sampleSize) break;
+			const val = row[columnId];
+			if (val !== null && val !== undefined && val !== '') {
+				sampleCount++;
+				if (typeof val === 'number' || (typeof val === 'string' && !isNaN(Number(val)))) {
+					numericCount++;
+				}
+			}
+		}
+
+		// Consider column numeric if majority of samples are numeric
+		return sampleCount > 0 && numericCount / sampleCount >= 0.8;
+	}
+
+	// Get min/max range for numeric columns
+	function getNumericRange(columnId: string): { min: number; max: number } | null {
+		if (!columnId || !data || data.length === 0) return null;
+
+		// Invalidate cache if data changed
+		if (data.length !== lastDataLength) {
+			numericRangeCache.clear();
+		}
+
+		// Return cached range if available
+		if (numericRangeCache.has(columnId)) {
+			return numericRangeCache.get(columnId)!;
+		}
+
+		if (!isNumericColumn(columnId)) {
+			numericRangeCache.set(columnId, null);
+			return null;
+		}
+
+		let min = Infinity;
+		let max = -Infinity;
+
+		for (const row of data) {
+			const val = row[columnId];
+			if (val !== null && val !== undefined && val !== '') {
+				const num = typeof val === 'number' ? val : Number(val);
+				if (!isNaN(num)) {
+					min = Math.min(min, num);
+					max = Math.max(max, num);
+				}
+			}
+		}
+
+		const range = min !== Infinity ? { min, max } : null;
+		numericRangeCache.set(columnId, range);
+		return range;
+	}
+
+	// Extract unique values for a column
+	function getColumnValues(columnId: string): string[] {
+		if (!columnId || !data || data.length === 0) return [];
+
+		// Invalidate cache if data length changed (simple heuristic)
+		if (data.length !== lastDataLength) {
+			columnValuesCache.clear();
+			numericRangeCache.clear();
+			lastDataLength = data.length;
+		}
+
+		// Return cached values if available
+		if (columnValuesCache.has(columnId)) {
+			return columnValuesCache.get(columnId)!;
+		}
+
+		// Extract unique values
+		const values = new Set<string>();
+		for (const row of data) {
+			const val = row[columnId];
+			if (val !== null && val !== undefined && val !== '') {
+				values.add(String(val));
+			}
+		}
+
+		// Sort and cache
+		const sortedValues = Array.from(values).sort((a, b) => a.localeCompare(b));
+		columnValuesCache.set(columnId, sortedValues);
+
+		return sortedValues;
+	}
 
 	function generateId(): string {
 		return `filter-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -119,6 +220,8 @@
 									{columns}
 									{columnOrder}
 									{storageKey}
+									columnValues={getColumnValues(condition.field)}
+									numericRange={getNumericRange(condition.field)}
 									onUpdate={(updated) => updateCondition(index, updated)}
 									onRemove={() => removeCondition(index)}
 								/>

@@ -33,6 +33,8 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - Real-time filtering as you type
 - **Column order modes** - Cycle between Default, Table Order, and A-Z sorting in field picker (v0.7.0+)
 - **Fuzzy search** - Type to quickly find columns in large tables with highlighted matches (v0.8.0+)
+- **Value suggestions** - Autocomplete dropdown shows existing column values as you type (v0.10.0+)
+- **Numeric range hints** - Numeric columns display min/max range in the value input (v0.10.0+)
 
 **Sorting Options:**
 - **Column header mode** (default) - Click headers to sort with ↑↓↕ indicators

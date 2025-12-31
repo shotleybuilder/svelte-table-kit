@@ -56,6 +56,13 @@ This document outlines the development pipeline for svelte-table-kit, organized 
 - [x] **Numeric comparisons** - Greater than / Less than options for numeric cells
 - [x] **Auto-expand FilterBar** - FilterBar opens automatically when filter created
 
+### v0.10.0 - Filter Value Suggestions
+- [x] **Value autocomplete** - Dropdown shows existing column values as you type
+- [x] **Fuzzy search in suggestions** - Type to filter suggestions with intelligent matching
+- [x] **Keyboard navigation** - Arrow keys, Enter, Escape for efficient selection
+- [x] **Numeric range hints** - Numeric columns display min/max range instead of suggestions
+- [x] **Performance caching** - Unique values cached per column, invalidated on data change
+
 ---
 
 ## 🚀 Next Release (v0.4.0) - Native TanStack Features
@@ -320,7 +327,14 @@ Want to help implement a feature from the roadmap?
 
 ## 📖 Version History
 
-### v0.9.0 (Current)
+### v0.10.0 (Current)
+- ✅ Value autocomplete in filter value input
+- ✅ Fuzzy search in value suggestions
+- ✅ Keyboard navigation for suggestions
+- ✅ Numeric range hints (min/max display)
+- ✅ Performance caching for unique values
+
+### v0.9.0
 - ✅ Cell context menu (right-click to filter)
 - ✅ Filter by value / Exclude value actions
 - ✅ Numeric comparison options (greater/less than)

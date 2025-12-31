@@ -9,33 +9,82 @@
 	export let columns: ColumnDef<any>[];
 	export let columnOrder: string[] = [];
 	export let storageKey: string = 'table-kit';
+	export let columnValues: string[] = [];
+	export let numericRange: { min: number; max: number } | null = null;
 	export let onUpdate: (condition: FilterCondition) => void;
 	export let onRemove: () => void;
 
 	// Column order mode state
 	let orderMode: ColumnOrderMode = 'definition';
 
-	// Fuzzy search state
+	// Fuzzy search state for field picker
 	let searchTerm = '';
 	let showDropdown = false;
 	let highlightedIndex = 0;
 	let searchInputRef: HTMLInputElement;
 	let dropdownRef: HTMLDivElement;
 
+	// Value suggestions state
+	let showValueSuggestions = false;
+	let valueSuggestionIndex = 0;
+	let valueInputRef: HTMLInputElement;
+	let valueSuggestionsRef: HTMLDivElement;
+
 	// Load persisted order mode on mount
 	onMount(() => {
 		orderMode = loadFilterColumnOrderMode(storageKey);
 
-		// Close dropdown when clicking outside
+		// Close dropdowns when clicking outside
 		function handleClickOutside(event: MouseEvent) {
 			if (dropdownRef && !dropdownRef.contains(event.target as Node)) {
 				showDropdown = false;
+			}
+			if (valueSuggestionsRef && !valueSuggestionsRef.contains(event.target as Node)) {
+				showValueSuggestions = false;
 			}
 		}
 
 		document.addEventListener('click', handleClickOutside);
 		return () => document.removeEventListener('click', handleClickOutside);
 	});
+
+	// Filter value suggestions based on current input
+	$: filteredValueSuggestions = (() => {
+		if (!columnValues || columnValues.length === 0) return [];
+
+		const currentValue = condition.value || '';
+		if (!currentValue.trim()) {
+			// Show all values (limited) when input is empty
+			return columnValues.slice(0, 50).map((val) => ({
+				value: val,
+				matchedIndices: [] as number[],
+				score: 0
+			}));
+		}
+
+		// Fuzzy filter suggestions
+		const results: { value: string; matchedIndices: number[]; score: number }[] = [];
+		for (const val of columnValues) {
+			const match = fuzzyMatch(currentValue, val);
+			if (match) {
+				results.push({
+					value: val,
+					matchedIndices: match.matchedIndices,
+					score: match.score
+				});
+			}
+		}
+
+		return results.sort((a, b) => b.score - a.score).slice(0, 50);
+	})();
+
+	// Reset suggestion index when filtered results change
+	$: if (filteredValueSuggestions) {
+		valueSuggestionIndex = 0;
+	}
+
+	// Check if we should show suggestions (has values and not disabled)
+	$: canShowSuggestions = columnValues.length > 0 && !valueDisabled;
 
 	// Cycle through order modes
 	function cycleOrderMode() {
@@ -215,6 +264,63 @@
 	function handleValueChange(event: Event) {
 		const value = (event.target as HTMLInputElement).value;
 		onUpdate({ ...condition, value });
+		// Show suggestions when typing
+		if (canShowSuggestions && value.length >= 0) {
+			showValueSuggestions = true;
+		}
+	}
+
+	function handleValueFocus() {
+		if (canShowSuggestions) {
+			showValueSuggestions = true;
+			valueSuggestionIndex = 0;
+		}
+	}
+
+	function selectValueSuggestion(value: string) {
+		onUpdate({ ...condition, value });
+		showValueSuggestions = false;
+	}
+
+	function handleValueKeydown(event: KeyboardEvent) {
+		if (!showValueSuggestions || filteredValueSuggestions.length === 0) return;
+
+		switch (event.key) {
+			case 'ArrowDown':
+				event.preventDefault();
+				valueSuggestionIndex = Math.min(
+					valueSuggestionIndex + 1,
+					filteredValueSuggestions.length - 1
+				);
+				scrollToHighlightedSuggestion();
+				break;
+			case 'ArrowUp':
+				event.preventDefault();
+				valueSuggestionIndex = Math.max(valueSuggestionIndex - 1, 0);
+				scrollToHighlightedSuggestion();
+				break;
+			case 'Enter':
+				event.preventDefault();
+				if (filteredValueSuggestions[valueSuggestionIndex]) {
+					selectValueSuggestion(filteredValueSuggestions[valueSuggestionIndex].value);
+				}
+				break;
+			case 'Escape':
+				event.preventDefault();
+				showValueSuggestions = false;
+				break;
+			case 'Tab':
+				showValueSuggestions = false;
+				break;
+		}
+	}
+
+	async function scrollToHighlightedSuggestion() {
+		await tick();
+		const highlighted = valueSuggestionsRef?.querySelector('.suggestion-option.highlighted');
+		if (highlighted) {
+			highlighted.scrollIntoView({ block: 'nearest' });
+		}
 	}
 
 	// Check if value input should be disabled (e.g., for "is_empty")
@@ -298,14 +404,57 @@
 		{/each}
 	</select>
 
-	<input
-		type="text"
-		class="value-input"
-		value={condition.value || ''}
-		on:input={handleValueChange}
-		disabled={valueDisabled}
-		placeholder={valueDisabled ? 'N/A' : 'Enter value...'}
-	/>
+	<div class="value-input-wrapper" bind:this={valueSuggestionsRef}>
+		<input
+			bind:this={valueInputRef}
+			type="text"
+			class="value-input"
+			value={condition.value || ''}
+			on:input={handleValueChange}
+			on:focus={handleValueFocus}
+			on:keydown={handleValueKeydown}
+			disabled={valueDisabled}
+			placeholder={valueDisabled ? 'N/A' : numericRange ? `${numericRange.min} - ${numericRange.max}` : 'Enter value...'}
+			autocomplete="off"
+		/>
+
+		{#if numericRange && !valueDisabled}
+			<div class="numeric-range-hint">
+				Range: {numericRange.min} - {numericRange.max}
+			</div>
+		{/if}
+
+		{#if showValueSuggestions && filteredValueSuggestions.length > 0 && !numericRange}
+			<div class="value-suggestions">
+				{#each filteredValueSuggestions as { value, matchedIndices }, i}
+					<button
+						class="suggestion-option"
+						class:highlighted={i === valueSuggestionIndex}
+						on:click={() => selectValueSuggestion(value)}
+						on:mouseenter={() => (valueSuggestionIndex = i)}
+						type="button"
+					>
+						{#if matchedIndices.length > 0}
+							{#each highlightMatches(value, matchedIndices) as segment}
+								{#if segment.isMatch}
+									<mark class="match-highlight">{segment.text}</mark>
+								{:else}
+									{segment.text}
+								{/if}
+							{/each}
+						{:else}
+							{value}
+						{/if}
+					</button>
+				{/each}
+				{#if columnValues.length > 50}
+					<div class="suggestions-overflow">
+						and {columnValues.length - 50} more...
+					</div>
+				{/if}
+			</div>
+		{/if}
+	</div>
 
 	<button class="remove-btn" on:click={onRemove} title="Remove condition" type="button">
 		<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -495,6 +644,16 @@
 		min-width: 100px;
 	}
 
+	.value-input-wrapper {
+		position: relative;
+		flex: 1;
+		min-width: 120px;
+	}
+
+	.value-input-wrapper .value-input {
+		width: 100%;
+	}
+
 	.value-input {
 		flex: 1;
 		min-width: 120px;
@@ -504,6 +663,62 @@
 		background: #f3f4f6;
 		color: #9ca3af;
 		cursor: not-allowed;
+	}
+
+	.value-suggestions {
+		position: absolute;
+		top: calc(100% + 4px);
+		left: 0;
+		right: 0;
+		max-height: 200px;
+		overflow-y: auto;
+		background: white;
+		border: 1px solid #d1d5db;
+		border-radius: 0.375rem;
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		z-index: 50;
+	}
+
+	.suggestion-option {
+		display: block;
+		width: 100%;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.875rem;
+		text-align: left;
+		background: none;
+		border: none;
+		cursor: pointer;
+		transition: background-color 0.1s;
+	}
+
+	.suggestion-option:hover,
+	.suggestion-option.highlighted {
+		background: #f3f4f6;
+	}
+
+	.suggestions-overflow {
+		padding: 0.5rem 0.75rem;
+		font-size: 0.75rem;
+		color: #6b7280;
+		text-align: center;
+		border-top: 1px solid #e5e7eb;
+		background: #f9fafb;
+	}
+
+	.numeric-range-hint {
+		position: absolute;
+		top: calc(100% + 4px);
+		left: 0;
+		right: 0;
+		padding: 0.375rem 0.75rem;
+		font-size: 0.75rem;
+		color: #6b7280;
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		text-align: center;
 	}
 
 	.remove-btn {

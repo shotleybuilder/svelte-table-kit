@@ -483,6 +483,7 @@
 				<div class="table-kit-filters">
 					<FilterBar
 						{columns}
+						{data}
 						columnOrder={$columnOrder}
 						{storageKey}
 						conditions={$filterConditions}

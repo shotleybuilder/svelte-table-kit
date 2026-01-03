@@ -12,7 +12,7 @@ import type { ColumnOrderMode } from '../types';
 
 /**
  * Check if we're in a browser environment
- * Note: In SvelteKit apps, import from '$app/environment'
+ * Uses cross-bundler compatible check instead of SvelteKit-specific imports
  */
 export const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 

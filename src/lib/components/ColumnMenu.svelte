@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Column } from '@tanstack/svelte-table';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
-	import { browser } from '$app/environment';
+	import { isBrowser } from '../stores/persistence';
 
 	export let column: Column<any>;
 	export let isOpen = false;
@@ -60,7 +60,7 @@
 
 	// Manage event listeners based on isOpen state (browser only)
 	$: {
-		if (browser) {
+		if (isBrowser) {
 			if (isOpen) {
 				// Add a small delay to prevent immediate closing from the same click that opened the menu
 				setTimeout(() => {
@@ -75,7 +75,7 @@
 	}
 
 	onDestroy(() => {
-		if (browser) {
+		if (isBrowser) {
 			document.removeEventListener('mousedown', handleClickOutside);
 			document.removeEventListener('keydown', handleKeydown);
 		}

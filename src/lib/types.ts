@@ -103,6 +103,24 @@ export type FilterLogic = 'and' | 'or';
 
 export type ColumnOrderMode = 'definition' | 'ui' | 'alphabetical';
 
+/**
+ * Column data type for filter operator adaptation
+ */
+export type ColumnDataType = 'text' | 'number' | 'date' | 'boolean' | 'select';
+
+/**
+ * Extended column meta for data type awareness
+ * Use in column definitions: { meta: { dataType: 'number', selectOptions: [...] } }
+ */
+export interface ColumnMeta {
+	/** Data type for filter operator adaptation */
+	dataType?: ColumnDataType;
+	/** Options for 'select' type columns */
+	selectOptions?: { value: string; label: string }[];
+	/** Column group for grouped picker (future feature) */
+	group?: string;
+}
+
 export interface FilterCondition {
 	id: string;
 	field: string;

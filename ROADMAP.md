@@ -63,6 +63,14 @@ This document outlines the development pipeline for svelte-table-kit, organized 
 - [x] **Numeric range hints** - Numeric columns display min/max range instead of suggestions
 - [x] **Performance caching** - Unique values cached per column, invalidated on data change
 
+### v0.11.0 - Data Type Awareness
+- [x] **Column data types** - Define column types: text, number, date, boolean, select
+- [x] **Type-aware operators** - Filter operators adapt based on column data type
+- [x] **Date operators** - Added is_before and is_after for date comparisons
+- [x] **Adaptive value inputs** - Text input, number input, date picker, or select based on type
+- [x] **Select options** - Define dropdown options via column meta for select-type columns
+- [x] **Graceful fallback** - Columns without type default to text behavior
+
 ---
 
 ## 🚀 Next Release (v0.4.0) - Native TanStack Features
@@ -327,7 +335,14 @@ Want to help implement a feature from the roadmap?
 
 ## 📖 Version History
 
-### v0.10.0 (Current)
+### v0.11.0 (Current)
+- ✅ Column data types (text, number, date, boolean, select)
+- ✅ Type-aware filter operators
+- ✅ Date operators (is_before, is_after)
+- ✅ Adaptive value inputs based on data type
+- ✅ Select options via column meta
+
+### v0.10.0
 - ✅ Value autocomplete in filter value input
 - ✅ Fuzzy search in value suggestions
 - ✅ Keyboard navigation for suggestions

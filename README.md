@@ -26,7 +26,7 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - 📋 **Column context menu** - Quick access to sort, filter, group, and hide actions
 
 **Advanced Filtering:**
-- 12 filter operators: equals, contains, starts with, greater than, etc.
+- 14 filter operators: equals, contains, starts with, greater than, is_before, is_after, etc.
 - AND/OR logic between conditions
 - Collapsible FilterBar UI (space-efficient)
 - Active filter count badge
@@ -35,6 +35,7 @@ Svelte Table Kit brings Airtable-like functionality to your Svelte applications 
 - **Fuzzy search** - Type to quickly find columns in large tables with highlighted matches (v0.8.0+)
 - **Value suggestions** - Autocomplete dropdown shows existing column values as you type (v0.10.0+)
 - **Numeric range hints** - Numeric columns display min/max range in the value input (v0.10.0+)
+- **Data type awareness** - Operators and value inputs adapt based on column data type (v0.11.0+)
 
 **Sorting Options:**
 - **Column header mode** (default) - Click headers to sort with ↑↓↕ indicators

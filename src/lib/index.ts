@@ -18,6 +18,8 @@ export type {
 	FilterOperator,
 	FilterLogic,
 	ColumnOrderMode,
+	ColumnDataType,
+	ColumnMeta,
 	SortConfig,
 	ClassNameMap,
 	TableFeatures,
@@ -36,8 +38,10 @@ export {
 	createSelectFilter,
 	createNumericFilter,
 	evaluateCondition,
-	applyFilters
+	applyFilters,
+	getOperatorsForType
 } from './utils/filters';
+export type { OperatorOption } from './utils/filters';
 
 // Formatters
 export { formatDate, formatCurrency, formatNumber, formatPercent } from './utils/formatters';

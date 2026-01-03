@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { ColumnDef } from '@tanstack/svelte-table';
-	import type { FilterCondition, FilterOperator, ColumnOrderMode } from '../types';
+	import type { FilterCondition, FilterOperator, ColumnOrderMode, ColumnDataType, ColumnMeta } from '../types';
 	import { loadFilterColumnOrderMode, saveFilterColumnOrderMode } from '../stores/persistence';
 	import { fuzzyMatch, highlightMatches } from '../utils/fuzzy';
+	import { getOperatorsForType } from '../utils/filters';
 	import { onMount, tick } from 'svelte';
 
 	export let condition: FilterCondition;
@@ -179,28 +180,43 @@
 		highlightedIndex = 0;
 	}
 
+	// Get the current selected column
+	$: selectedColumn = condition.field
+		? columns.find((c) => getColumnId(c) === condition.field)
+		: null;
+
 	// Get the current selected column's label for display
 	$: selectedColumnLabel = (() => {
 		if (!condition.field) return '';
-		const col = columns.find((c) => getColumnId(c) === condition.field);
-		return col ? getColumnLabel(col) : condition.field;
+		return selectedColumn ? getColumnLabel(selectedColumn) : condition.field;
 	})();
 
-	// Get operator options based on field type (simplified for now)
-	const operatorOptions: { value: FilterOperator; label: string }[] = [
-		{ value: 'equals', label: 'equals' },
-		{ value: 'not_equals', label: 'does not equal' },
-		{ value: 'contains', label: 'contains' },
-		{ value: 'not_contains', label: 'does not contain' },
-		{ value: 'starts_with', label: 'starts with' },
-		{ value: 'ends_with', label: 'ends with' },
-		{ value: 'is_empty', label: 'is empty' },
-		{ value: 'is_not_empty', label: 'is not empty' },
-		{ value: 'greater_than', label: '>' },
-		{ value: 'less_than', label: '<' },
-		{ value: 'greater_or_equal', label: '>=' },
-		{ value: 'less_or_equal', label: '<=' }
-	];
+	// Get data type from column meta
+	$: columnDataType = (() => {
+		if (!selectedColumn) return 'text' as ColumnDataType;
+		const meta = (selectedColumn as any).meta as ColumnMeta | undefined;
+		return (meta?.dataType || 'text') as ColumnDataType;
+	})();
+
+	// Get select options from column meta (for 'select' type)
+	$: selectOptions = (() => {
+		if (!selectedColumn) return [];
+		const meta = (selectedColumn as any).meta as ColumnMeta | undefined;
+		return meta?.selectOptions || [];
+	})();
+
+	// Get operator options based on column data type (reactive)
+	$: operatorOptions = getOperatorsForType(columnDataType);
+
+	// Reset operator to 'equals' if current operator is not valid for new data type
+	$: {
+		if (condition.field && operatorOptions.length > 0) {
+			const currentOperatorValid = operatorOptions.some((op) => op.value === condition.operator);
+			if (!currentOperatorValid) {
+				onUpdate({ ...condition, operator: 'equals' });
+			}
+		}
+	}
 
 	function selectColumn(col: ColumnDef<any>) {
 		const field = getColumnId(col);
@@ -405,54 +421,102 @@
 	</select>
 
 	<div class="value-input-wrapper" bind:this={valueSuggestionsRef}>
-		<input
-			bind:this={valueInputRef}
-			type="text"
-			class="value-input"
-			value={condition.value || ''}
-			on:input={handleValueChange}
-			on:focus={handleValueFocus}
-			on:keydown={handleValueKeydown}
-			disabled={valueDisabled}
-			placeholder={valueDisabled ? 'N/A' : numericRange ? `${numericRange.min} - ${numericRange.max}` : 'Enter value...'}
-			autocomplete="off"
-		/>
-
-		{#if numericRange && !valueDisabled}
-			<div class="numeric-range-hint">
-				Range: {numericRange.min} - {numericRange.max}
-			</div>
-		{/if}
-
-		{#if showValueSuggestions && filteredValueSuggestions.length > 0 && !numericRange}
-			<div class="value-suggestions">
-				{#each filteredValueSuggestions as { value, matchedIndices }, i}
-					<button
-						class="suggestion-option"
-						class:highlighted={i === valueSuggestionIndex}
-						on:click={() => selectValueSuggestion(value)}
-						on:mouseenter={() => (valueSuggestionIndex = i)}
-						type="button"
-					>
-						{#if matchedIndices.length > 0}
-							{#each highlightMatches(value, matchedIndices) as segment}
-								{#if segment.isMatch}
-									<mark class="match-highlight">{segment.text}</mark>
-								{:else}
-									{segment.text}
-								{/if}
-							{/each}
-						{:else}
-							{value}
-						{/if}
-					</button>
+		{#if columnDataType === 'boolean'}
+			<!-- Boolean: dropdown with true/false -->
+			<select
+				class="value-input"
+				value={condition.value || ''}
+				on:change={handleValueChange}
+				disabled={valueDisabled}
+			>
+				<option value="">Select...</option>
+				<option value="true">True</option>
+				<option value="false">False</option>
+			</select>
+		{:else if columnDataType === 'select' && selectOptions.length > 0}
+			<!-- Select: dropdown with options from meta -->
+			<select
+				class="value-input"
+				value={condition.value || ''}
+				on:change={handleValueChange}
+				disabled={valueDisabled}
+			>
+				<option value="">Select...</option>
+				{#each selectOptions as opt}
+					<option value={opt.value}>{opt.label}</option>
 				{/each}
-				{#if columnValues.length > 50}
-					<div class="suggestions-overflow">
-						and {columnValues.length - 50} more...
-					</div>
-				{/if}
-			</div>
+			</select>
+		{:else if columnDataType === 'date'}
+			<!-- Date: date input -->
+			<input
+				bind:this={valueInputRef}
+				type="date"
+				class="value-input"
+				value={condition.value || ''}
+				on:input={handleValueChange}
+				disabled={valueDisabled}
+			/>
+		{:else if columnDataType === 'number'}
+			<!-- Number: number input with range hint -->
+			<input
+				bind:this={valueInputRef}
+				type="number"
+				class="value-input"
+				value={condition.value || ''}
+				on:input={handleValueChange}
+				disabled={valueDisabled}
+				placeholder={valueDisabled ? 'N/A' : numericRange ? `${numericRange.min} - ${numericRange.max}` : 'Enter number...'}
+			/>
+			{#if numericRange && !valueDisabled}
+				<div class="numeric-range-hint">
+					Range: {numericRange.min} - {numericRange.max}
+				</div>
+			{/if}
+		{:else}
+			<!-- Text: text input with autocomplete suggestions -->
+			<input
+				bind:this={valueInputRef}
+				type="text"
+				class="value-input"
+				value={condition.value || ''}
+				on:input={handleValueChange}
+				on:focus={handleValueFocus}
+				on:keydown={handleValueKeydown}
+				disabled={valueDisabled}
+				placeholder={valueDisabled ? 'N/A' : 'Enter value...'}
+				autocomplete="off"
+			/>
+
+			{#if showValueSuggestions && filteredValueSuggestions.length > 0}
+				<div class="value-suggestions">
+					{#each filteredValueSuggestions as { value, matchedIndices }, i}
+						<button
+							class="suggestion-option"
+							class:highlighted={i === valueSuggestionIndex}
+							on:click={() => selectValueSuggestion(value)}
+							on:mouseenter={() => (valueSuggestionIndex = i)}
+							type="button"
+						>
+							{#if matchedIndices.length > 0}
+								{#each highlightMatches(value, matchedIndices) as segment}
+									{#if segment.isMatch}
+										<mark class="match-highlight">{segment.text}</mark>
+									{:else}
+										{segment.text}
+									{/if}
+								{/each}
+							{:else}
+								{value}
+							{/if}
+						</button>
+					{/each}
+					{#if columnValues.length > 50}
+						<div class="suggestions-overflow">
+							and {columnValues.length - 50} more...
+						</div>
+					{/if}
+				</div>
+			{/if}
 		{/if}
 	</div>
 

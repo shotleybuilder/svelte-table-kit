@@ -44,9 +44,14 @@
 		setExpanded(false);
 	}
 
+	// Helper to get column ID (accessorKey is on AccessorKeyColumnDef variant)
+	function getColumnId(col: ColumnDef<any>): string {
+		return ((col as any).accessorKey || col.id || '') as string;
+	}
+
 	// Get available columns that can be grouped
 	$: availableColumns = columns.filter((col) => {
-		const columnId = col.accessorKey || col.id;
+		const columnId = getColumnId(col);
 		return columnId && col.enableGrouping !== false;
 	});
 
@@ -100,7 +105,7 @@
 							>
 								<option value="">Select field...</option>
 								{#each availableColumns as column}
-									{@const columnId = column.accessorKey || column.id}
+									{@const columnId = getColumnId(column)}
 									<option value={columnId}>
 										{column.header || columnId}
 									</option>

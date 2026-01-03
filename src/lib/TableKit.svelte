@@ -44,7 +44,7 @@
 	import ColumnMenu from './components/ColumnMenu.svelte';
 	import CellContextMenu from './components/CellContextMenu.svelte';
 
-	type T = $$Generic;
+	type T = $$Generic<Record<string, unknown>>;
 
 	// Required props
 	export let data: TableKitProps<T>['data'] = [];
@@ -52,12 +52,12 @@
 
 	// Optional props with defaults
 	export let config: TableKitProps<T>['config'] = undefined;
-	export let storageKey: TableKitProps<T>['storageKey'] = 'table-kit';
+	export let storageKey: NonNullable<TableKitProps<T>['storageKey']> = 'table-kit';
 	export let persistState: TableKitProps<T>['persistState'] = true;
 	export let align: TableKitProps<T>['align'] = 'left';
 	export let rowHeight: TableKitProps<T>['rowHeight'] = 'medium';
 	export let columnSpacing: TableKitProps<T>['columnSpacing'] = 'normal';
-	export let features: TableKitProps<T>['features'] = {
+	export let features: NonNullable<TableKitProps<T>['features']> = {
 		columnVisibility: true,
 		columnResizing: true,
 		columnReordering: true,
@@ -69,8 +69,14 @@
 
 	// Callbacks
 	export let onRowClick: TableKitProps<T>['onRowClick'] = undefined;
-	export let onRowSelect: TableKitProps<T>['onRowSelect'] = undefined;
+	/** @deprecated Row selection not yet implemented - reserved for future use */
+	export let onRowSelect: TableKitProps<T>['onRowSelect'] = undefined; // eslint-disable-line @typescript-eslint/no-unused-vars
 	export let onStateChange: TableKitProps<T>['onStateChange'] = undefined;
+
+	// Helper to get column ID (accessorKey is on AccessorKeyColumnDef variant)
+	function getColumnId(col: ColumnDef<T>): string {
+		return ((col as any).accessorKey || col.id || '') as string;
+	}
 
 	// State stores - Initialize as empty, will be populated by reactive statements
 	let sorting = writable<SortingState>([]);
@@ -130,7 +136,7 @@
 			if (config.defaultVisibleColumns && columns.length > 0) {
 				const visibilityMap: VisibilityState = {};
 				columns.forEach((col) => {
-					const colId = (col.accessorKey || col.id) as string;
+					const colId = getColumnId(col);
 					if (config && config.defaultVisibleColumns) {
 						visibilityMap[colId] = config.defaultVisibleColumns.includes(colId);
 					}
@@ -405,7 +411,7 @@
 
 	// Initialize column order if empty
 	$: if ($columnOrder.length === 0 && columns.length > 0) {
-		columnOrder.set(columns.map((col) => col.accessorKey || col.id) as string[]);
+		columnOrder.set(columns.map((col) => getColumnId(col)));
 	}
 
 	// Cell context menu handlers
@@ -462,8 +468,8 @@
 			columnVisibility: $columnVisibility,
 			columnOrder: $columnOrder,
 			columnSizing: $columnSizing,
-			columnFilters: $columnFilters,
-			sorting: $sorting,
+			columnFilters: $filterConditions,
+			sorting: $sorting.map((s) => ({ columnId: s.id, direction: s.desc ? 'desc' : 'asc' })),
 			pagination: $table.getState().pagination
 		});
 	}
@@ -768,8 +774,10 @@
 								>
 									{#if !header.isPlaceholder}
 										<div class="th-wrapper">
+											<!-- svelte-ignore a11y-no-static-element-interactions -->
 											<div
 												class="th-content"
+												role={features.columnReordering !== false ? 'button' : undefined}
 												style="padding: {verticalPadding}rem {horizontalPadding}rem; cursor: {features.columnReordering !==
 												false
 													? 'grab'
@@ -789,10 +797,7 @@
 															/>
 														</span>
 														<span class="sort-icon">
-															{{
-																asc: '↑',
-																desc: '↓'
-															}[header.column.getIsSorted()] ?? '↕'}
+															{header.column.getIsSorted() === 'asc' ? '↑' : header.column.getIsSorted() === 'desc' ? '↓' : '↕'}
 														</span>
 													</button>
 												{:else}

@@ -163,7 +163,7 @@ export function evaluateCondition(condition: FilterCondition, rowValue: any): bo
 /**
  * Filter data array by multiple conditions with AND or OR logic
  */
-export function applyFilters<T extends Record<string, any>>(
+export function applyFilters<T extends Record<string, unknown>>(
 	data: T[],
 	conditions: FilterCondition[],
 	logic: FilterLogic = 'and'

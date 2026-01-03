@@ -131,6 +131,8 @@
 				onRowClick={handleRowClick}
 				align="left"
 				config={{
+					id: 'example-table',
+					version: '1',
 					defaultColumnOrder: ['organization', 'type', 'status', 'date', 'description', 'fine_amount']
 				}}
 				features={{

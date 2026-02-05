@@ -34,6 +34,10 @@
 		saveColumnFilters,
 		loadColumnOrder,
 		saveColumnOrder,
+		loadGrouping,
+		saveGrouping,
+		loadExpanded,
+		saveExpanded,
 		isBrowser
 	} from './stores/persistence';
 	import type { TableKitProps, FilterCondition, FilterLogic } from './types';
@@ -168,6 +172,16 @@
 				columnSizing.set(config.defaultColumnSizing);
 			}
 
+			// Apply grouping
+			if (config.defaultGrouping) {
+				grouping.set(config.defaultGrouping);
+			}
+
+			// Apply expanded state
+			if (config.defaultExpanded !== undefined) {
+				expanded.set(config.defaultExpanded);
+			}
+
 			// Update tracking
 			previousConfigId = config.id;
 			configInitialized = true;
@@ -178,6 +192,8 @@
 			columnVisibility.set(loadColumnVisibility(storageKey) || {});
 			columnSizing.set(loadColumnSizing(storageKey) || {});
 			columnFilters.set(loadColumnFilters(storageKey) || []);
+			grouping.set(loadGrouping(storageKey) || []);
+			expanded.set(loadExpanded(storageKey) ?? true);
 
 			configInitialized = true;
 		} else if (!hasConfig && !configInitialized) {
@@ -211,6 +227,8 @@
 			saveColumnSizing(storageKey, $columnSizing);
 			saveColumnFilters(storageKey, $columnFilters);
 			saveColumnOrder(storageKey, $columnOrder);
+			saveGrouping(storageKey, $grouping);
+			saveExpanded(storageKey, $expanded);
 		}
 	}
 

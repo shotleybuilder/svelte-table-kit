@@ -79,6 +79,8 @@ Set initial table state via `config` prop:
     defaultSorting: [
       { columnId: 'name', direction: 'asc' }
     ],
+    defaultGrouping: ['role'],
+    defaultExpanded: true,
     filterLogic: 'and'
   }}
 />
@@ -92,6 +94,8 @@ Set initial table state via `config` prop:
 - `defaultVisibleColumns` - Array of column IDs to show (others hidden)
 - `defaultFilters` - Array of FilterCondition objects
 - `defaultSorting` - Array of sort configurations
+- `defaultGrouping` - Array of column IDs for initial grouping (up to 3 levels)
+- `defaultExpanded` - Boolean controlling initial expanded state of groups (default: true)
 - `filterLogic` - 'and' or 'or' for combining filters
 
 ### Reactive Configuration (v0.4.0+)
@@ -432,7 +436,8 @@ Persists:
 - Column order
 - Filters
 - Sorting
-- Grouping
+- Grouping (column IDs)
+- Expanded state (group expand/collapse)
 - Pagination
 
 ### Disable Persistence

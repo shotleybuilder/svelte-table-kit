@@ -63,6 +63,10 @@ export interface TableConfig {
 	// Sort configuration
 	defaultSorting?: SortConfig[];
 
+	// Grouping configuration
+	defaultGrouping?: string[];
+	defaultExpanded?: boolean;
+
 	// Pagination
 	pagination?: {
 		pageSize: number;

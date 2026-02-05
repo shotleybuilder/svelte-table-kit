@@ -160,6 +160,8 @@ Customize initial table state programmatically:
     defaultSorting: [
       { columnId: 'name', direction: 'asc' }
     ],
+    defaultGrouping: ['role'],
+    defaultExpanded: true,
     filterLogic: 'and'
   }}
   features={{
@@ -361,6 +363,8 @@ interface TableConfig {
   defaultVisibleColumns?: string[];        // Visible column IDs (others hidden)
   defaultFilters?: FilterCondition[];      // Initial filter conditions
   defaultSorting?: SortConfig[];           // Initial sort configuration
+  defaultGrouping?: string[];              // Initial grouping column IDs (up to 3)
+  defaultExpanded?: boolean;               // Initial expanded state for groups (default: true)
   filterLogic?: 'and' | 'or';              // Filter combination logic
   pagination?: {
     pageSize: number;

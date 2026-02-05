@@ -6,7 +6,9 @@ import type {
 	ColumnFiltersState,
 	ColumnOrderState,
 	SortingState,
-	PaginationState
+	PaginationState,
+	GroupingState,
+	ExpandedState
 } from '@tanstack/svelte-table';
 import type { ColumnOrderMode } from '../types';
 
@@ -132,6 +134,34 @@ export function savePagination(storageKey: string, state: PaginationState): void
 }
 
 /**
+ * Load grouping state from localStorage
+ */
+export function loadGrouping(storageKey: string): GroupingState {
+	return loadFromStorage(`${storageKey}_grouping`, []);
+}
+
+/**
+ * Save grouping state to localStorage
+ */
+export function saveGrouping(storageKey: string, state: GroupingState): void {
+	saveToStorage(`${storageKey}_grouping`, state);
+}
+
+/**
+ * Load expanded state from localStorage
+ */
+export function loadExpanded(storageKey: string): ExpandedState {
+	return loadFromStorage(`${storageKey}_expanded`, true);
+}
+
+/**
+ * Save expanded state to localStorage
+ */
+export function saveExpanded(storageKey: string, state: ExpandedState): void {
+	saveToStorage(`${storageKey}_expanded`, state);
+}
+
+/**
  * Load filter column order mode from localStorage
  */
 export function loadFilterColumnOrderMode(storageKey: string): ColumnOrderMode {
@@ -158,6 +188,8 @@ export function clearTableState(storageKey: string): void {
 		localStorage.removeItem(`${storageKey}_column_order`);
 		localStorage.removeItem(`${storageKey}_sorting`);
 		localStorage.removeItem(`${storageKey}_pagination`);
+		localStorage.removeItem(`${storageKey}_grouping`);
+		localStorage.removeItem(`${storageKey}_expanded`);
 		localStorage.removeItem(`${storageKey}_filter_column_order_mode`);
 	} catch (error) {
 		console.error('Failed to clear table state:', error);

@@ -71,6 +71,15 @@ This document outlines the development pipeline for svelte-table-kit, organized 
 - [x] **Select options** - Define dropdown options via column meta for select-type columns
 - [x] **Graceful fallback** - Columns without type default to text behavior
 
+### v0.12.0 - TypeScript Fixes
+- [x] **TypeScript error fixes** - Resolved type constraints and type errors
+
+### v0.13.0 - Default Grouping Configuration
+- [x] **defaultGrouping** - Set initial grouping columns via TableConfig (`defaultGrouping: string[]`)
+- [x] **defaultExpanded** - Control initial expanded/collapsed state for groups (`defaultExpanded: boolean`)
+- [x] **Grouping persistence** - Grouping and expanded state saved/loaded from localStorage
+- [x] **clearTableState updated** - Clearing table state now includes grouping and expanded keys
+
 ---
 
 ## 🚀 Next Release (v0.4.0) - Native TanStack Features
@@ -335,7 +344,16 @@ Want to help implement a feature from the roadmap?
 
 ## 📖 Version History
 
-### v0.11.0 (Current)
+### v0.13.0 (Current)
+- ✅ Default grouping configuration (`defaultGrouping: string[]`)
+- ✅ Default expanded state (`defaultExpanded: boolean`)
+- ✅ Grouping and expanded state persistence to localStorage
+- ✅ clearTableState includes grouping and expanded keys
+
+### v0.12.0
+- ✅ TypeScript error fixes and type constraint resolution
+
+### v0.11.0
 - ✅ Column data types (text, number, date, boolean, select)
 - ✅ Type-aware filter operators
 - ✅ Date operators (is_before, is_after)

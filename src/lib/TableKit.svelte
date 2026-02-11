@@ -948,6 +948,8 @@
 											</strong>
 											<span class="group-count">({row.subRows.length})</span>
 										</div>
+									{:else if row.getIsGrouped()}
+										<!-- Non-grouped column on a group row - render empty -->
 									{:else if cell.getIsAggregated()}
 										<!-- Aggregated cell - show computed value -->
 										<slot name="cell" {cell} column={cell.column.id}>
@@ -960,8 +962,6 @@
 										</slot>
 									{:else if cell.getIsPlaceholder()}
 										<!-- Placeholder cell - empty -->
-									{:else if row.getIsGrouped()}
-										<!-- Non-grouped column on a group row - render empty -->
 									{:else}
 										<!-- Normal cell -->
 										<!-- svelte-ignore a11y-no-static-element-interactions -->

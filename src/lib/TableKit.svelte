@@ -960,6 +960,8 @@
 										</slot>
 									{:else if cell.getIsPlaceholder()}
 										<!-- Placeholder cell - empty -->
+									{:else if row.getIsGrouped()}
+										<!-- Non-grouped column on a group row - render empty -->
 									{:else}
 										<!-- Normal cell -->
 										<!-- svelte-ignore a11y-no-static-element-interactions -->

@@ -40,6 +40,7 @@ export interface TableFeatures {
 	pagination?: boolean;
 	rowSelection?: boolean;
 	grouping?: boolean;
+	globalSearch?: boolean;
 	columnPinning?: boolean;
 }
 
@@ -157,6 +158,7 @@ export interface TableState {
 	columnSizing: Record<string, number>;
 	columnFilters: FilterCondition[];
 	sorting: SortConfig[];
+	globalFilter: string;
 	pagination: {
 		pageIndex: number;
 		pageSize: number;

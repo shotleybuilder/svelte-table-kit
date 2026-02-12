@@ -103,6 +103,9 @@
 	let expanded = writable<ExpandedState>(true); // Default to expanded
 	let groupBarExpanded = false;
 
+	// Global search state
+	let globalFilter = '';
+
 	// Cell context menu state
 	let cellContextMenu: {
 		show: boolean;
@@ -298,6 +301,7 @@
 	const options = writable({
 		data: filteredData,
 		columns,
+		globalFilterFn: 'includesString' as const,
 		columnResizeMode: 'onChange' as const,
 		enableColumnResizing: features.columnResizing !== false,
 		enableGrouping: features.grouping !== false,
@@ -313,7 +317,15 @@
 			columnFilters: $columnFilters,
 			columnOrder: $columnOrder,
 			grouping: $grouping,
-			expanded: $expanded
+			expanded: $expanded,
+			globalFilter: globalFilter
+		},
+		onGlobalFilterChange: (updater: any) => {
+			if (updater instanceof Function) {
+				globalFilter = updater(globalFilter);
+			} else {
+				globalFilter = updater;
+			}
 		},
 		onSortingChange: (updater: any) => {
 			if (updater instanceof Function) {
@@ -383,7 +395,8 @@
 			columnFilters: $columnFilters,
 			columnOrder: $columnOrder,
 			grouping: $grouping,
-			expanded: $expanded
+			expanded: $expanded,
+			globalFilter: globalFilter
 		}
 	}));
 
@@ -488,6 +501,7 @@
 			columnSizing: $columnSizing,
 			columnFilters: $filterConditions,
 			sorting: $sorting.map((s) => ({ columnId: s.id, direction: s.desc ? 'desc' : 'asc' })),
+			globalFilter: globalFilter,
 			pagination: $table.getState().pagination
 		});
 	}
@@ -495,12 +509,38 @@
 
 <div class="table-kit-container align-{align}">
 	<!-- Filters and Controls -->
-	{#if features.filtering !== false || features.grouping !== false || features.columnVisibility !== false || (features.sorting !== false && features.sortingMode === 'control')}
+	{#if features.filtering !== false || features.grouping !== false || features.columnVisibility !== false || (features.sorting !== false && features.sortingMode === 'control') || features.globalSearch === true}
 		<div class="table-kit-toolbar">
 			<!-- Slot for custom left-side controls (e.g., view selector, save buttons) -->
 			<div class="table-kit-custom-controls">
 				<slot name="toolbar-left" />
 			</div>
+
+			<!-- Global Search -->
+			{#if features.globalSearch === true}
+				<div class="table-kit-global-search">
+					<svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+					</svg>
+					<input
+						type="text"
+						class="search-input"
+						placeholder="Search all columns..."
+						bind:value={globalFilter}
+					/>
+					{#if globalFilter}
+						<button
+							class="search-clear"
+							on:click={() => (globalFilter = '')}
+							title="Clear search"
+						>
+							<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							</svg>
+						</button>
+					{/if}
+				</div>
+			{/if}
 
 			<!-- Filter Controls -->
 			{#if features.filtering !== false}
@@ -1084,6 +1124,69 @@
 		gap: 0.5rem;
 		flex-shrink: 0;
 		margin-right: auto;
+	}
+
+	/* Global search */
+	.table-kit-global-search {
+		position: relative;
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+	}
+
+	.table-kit-global-search .search-icon {
+		position: absolute;
+		left: 0.5rem;
+		width: 1rem;
+		height: 1rem;
+		color: #9ca3af;
+		pointer-events: none;
+	}
+
+	.table-kit-global-search .search-input {
+		padding: 0.375rem 1.75rem 0.375rem 1.75rem;
+		border: 1px solid #d1d5db;
+		border-radius: 0.375rem;
+		font-size: 0.8125rem;
+		line-height: 1.25rem;
+		width: 220px;
+		outline: none;
+		transition: border-color 0.15s, box-shadow 0.15s;
+	}
+
+	.table-kit-global-search .search-input:focus {
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+	}
+
+	.table-kit-global-search .search-input::placeholder {
+		color: #9ca3af;
+	}
+
+	.table-kit-global-search .search-clear {
+		position: absolute;
+		right: 0.375rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.125rem;
+		height: 1.125rem;
+		border: none;
+		background: none;
+		color: #9ca3af;
+		cursor: pointer;
+		padding: 0;
+		border-radius: 50%;
+	}
+
+	.table-kit-global-search .search-clear:hover {
+		color: #4b5563;
+		background: #f3f4f6;
+	}
+
+	.table-kit-global-search .search-clear svg {
+		width: 0.875rem;
+		height: 0.875rem;
 	}
 
 	.table-kit-filters {

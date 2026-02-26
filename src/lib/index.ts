@@ -8,6 +8,7 @@ export { default as FilterBar } from './components/FilterBar.svelte';
 export { default as FilterConditionEditor } from './components/FilterCondition.svelte';
 export { default as GroupBar } from './components/GroupBar.svelte';
 export { default as CellContextMenu } from './components/CellContextMenu.svelte';
+export { default as RowDetailModal } from './components/RowDetailModal.svelte';
 
 // TypeScript types
 export type {

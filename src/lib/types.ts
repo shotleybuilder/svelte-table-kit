@@ -42,6 +42,8 @@ export interface TableFeatures {
 	grouping?: boolean;
 	globalSearch?: boolean;
 	columnPinning?: boolean;
+	rowDetail?: boolean;
+	rowDetailMode?: 'modal' | 'drawer' | 'inline';
 }
 
 export interface TableConfig {
@@ -163,4 +165,5 @@ export interface TableState {
 		pageIndex: number;
 		pageSize: number;
 	};
+	selectedRowId: string | null;
 }

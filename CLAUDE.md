@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **svelte-table-kit** (`@shotleybuilder/svelte-table-kit`) is a comprehensive, AI-configurable data table component library for Svelte and SvelteKit, built on TanStack Table v8. It provides Airtable-like functionality with advanced filtering, multi-level grouping, column controls, and state persistence.
 
-**Current Version:** v0.13.0
+**Current Version:** v0.15.1
 
 ## Development Commands
 
@@ -80,6 +80,14 @@ npm run format                 # Format code with Prettier
 - Auto-positions to stay within viewport
 - Dispatches events handled by TableKit
 
+**RowDetailModal.svelte** - Row detail overlay modal (v0.15.0+)
+- Located: `src/lib/components/RowDetailModal.svelte`
+- Airtable-style "back of the card" row detail view
+- Centered modal with backdrop, ESC key and click-outside to close
+- Prev/next row navigation via buttons and arrow keys
+- Content provided via `row-detail` named slot on TableKit
+- Supports `let:row`, `let:close`, `let:goToPrev`, `let:goToNext`, `let:hasPrev`, `let:hasNext`
+
 ### State Management
 
 State is managed via Svelte writable stores for:
@@ -108,7 +116,7 @@ State is managed via Svelte writable stores for:
 - `FilterOperator` - Union type for 12+ filter operators
 - `FilterLogic` - 'and' | 'or' for combining conditions
 - `ColumnOrderMode` - 'definition' | 'ui' | 'alphabetical' for filter picker column ordering
-- `TableState` - Complete table state snapshot for persistence
+- `TableState` - Complete table state snapshot for persistence (includes `selectedRowId`)
 - `ViewPreset` - Saved table configurations
 - `ClassNameMap` - Custom CSS class names for styling
 
@@ -147,7 +155,7 @@ State is managed via Svelte writable stores for:
 ### Exports
 
 Main export: `src/lib/index.ts` - Re-exports all public APIs:
-- Components: TableKit, FilterBar, GroupBar, FilterCondition
+- Components: TableKit, FilterBar, GroupBar, FilterCondition, CellContextMenu, RowDetailModal
 - Types: All TypeScript interfaces
 - Presets: `presets` object with predefined configs
 - Utils: Config generators, filter utilities, formatters
@@ -168,7 +176,9 @@ features={{
   pagination: boolean,         // Pagination controls
   rowSelection: boolean,       // Checkboxes (planned v0.2.0)
   grouping: boolean,           // GroupBar UI
-  columnPinning: boolean       // Freeze columns (planned v0.2.0)
+  columnPinning: boolean,      // Freeze columns (planned v0.2.0)
+  rowDetail: boolean,          // Row detail modal (v0.15.0+)
+  rowDetailMode: 'modal' | 'drawer' | 'inline'  // Detail view mode (modal only for now)
 }}
 ```
 

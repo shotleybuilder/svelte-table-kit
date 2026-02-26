@@ -47,6 +47,7 @@
 	import SortBar from './components/SortBar.svelte';
 	import ColumnMenu from './components/ColumnMenu.svelte';
 	import CellContextMenu from './components/CellContextMenu.svelte';
+	import RowDetailModal from './components/RowDetailModal.svelte';
 
 	type T = $$Generic<Record<string, unknown>>;
 
@@ -125,6 +126,9 @@
 		isNumeric: false
 	};
 
+	// Row detail state
+	let selectedRowIndex: number | null = null;
+
 	// Reactive config application - Apply config when it changes
 	$: {
 		// Detect if config has changed by comparing IDs
@@ -180,9 +184,9 @@
 				grouping.set(config.defaultGrouping);
 			}
 
-			// Apply expanded state
+			// Apply expanded state (convert boolean to ExpandedState: true = all expanded, false = {} none expanded)
 			if (config.defaultExpanded !== undefined) {
-				expanded.set(config.defaultExpanded);
+				expanded.set(config.defaultExpanded ? true : {});
 			}
 
 			// Update tracking
@@ -484,8 +488,52 @@
 		closeCellContextMenu();
 	}
 
+	// Row detail functions
+	function openRowDetail(navIndex: number) {
+		selectedRowIndex = navIndex;
+	}
+
+	function closeRowDetail() {
+		selectedRowIndex = null;
+	}
+
+	function goToPrevRow() {
+		if (selectedRowIndex !== null && selectedRowIndex > 0) {
+			selectedRowIndex = selectedRowIndex - 1;
+		}
+	}
+
+	function goToNextRow() {
+		if (selectedRowIndex !== null && selectedRowIndex < navigableRows.length - 1) {
+			selectedRowIndex = selectedRowIndex + 1;
+		}
+	}
+
 	// Check if any filters are active
 	$: hasActiveFilters = $filterConditions.length > 0;
+
+	// Row detail: navigable rows (non-grouped data rows in current view)
+	$: navigableRows = $table.getRowModel().rows.filter((r) => !r.getIsGrouped());
+
+	// Row detail: currently selected row data
+	$: detailRow =
+		selectedRowIndex !== null && selectedRowIndex < navigableRows.length
+			? navigableRows[selectedRowIndex].original
+			: null;
+
+	// Row detail: navigation state
+	$: hasPrevRow = selectedRowIndex !== null && selectedRowIndex > 0;
+	$: hasNextRow =
+		selectedRowIndex !== null && selectedRowIndex < navigableRows.length - 1;
+
+	// Row detail: whether modal should be shown
+	$: showRowDetail =
+		features.rowDetail === true && selectedRowIndex !== null && detailRow !== null;
+
+	// Row detail: clamp index if navigable rows shrink (data/pagination change while open)
+	$: if (selectedRowIndex !== null && selectedRowIndex >= navigableRows.length) {
+		selectedRowIndex = navigableRows.length > 0 ? navigableRows.length - 1 : null;
+	}
 
 	// Calculate total table width from column sizes
 	// This ensures table-layout: fixed respects column widths when table overflows container
@@ -502,7 +550,11 @@
 			columnFilters: $filterConditions,
 			sorting: $sorting.map((s) => ({ columnId: s.id, direction: s.desc ? 'desc' : 'asc' })),
 			globalFilter: globalFilter,
-			pagination: $table.getState().pagination
+			pagination: $table.getState().pagination,
+			selectedRowId:
+				selectedRowIndex !== null && navigableRows[selectedRowIndex]
+					? navigableRows[selectedRowIndex].id
+					: null
 		});
 	}
 </script>
@@ -947,9 +999,16 @@
 				<tbody>
 					{#each $table.getRowModel().rows as row}
 						<tr
-							class:clickable={onRowClick !== undefined && !row.getIsGrouped()}
+							class:clickable={(onRowClick !== undefined || features.rowDetail === true) && !row.getIsGrouped()}
 							class:group-row={row.getIsGrouped()}
-							on:click={() => onRowClick && !row.getIsGrouped() && onRowClick(row.original)}
+							on:click={() => {
+								if (row.getIsGrouped()) return;
+								if (onRowClick) onRowClick(row.original);
+								if (features.rowDetail === true) {
+									const navIndex = navigableRows.indexOf(row);
+									if (navIndex !== -1) openRowDetail(navIndex);
+								}
+							}}
 							style="--cell-padding-vertical: {verticalPadding}rem; --cell-padding-horizontal: {horizontalPadding}rem;"
 						>
 							{#each row.getVisibleCells() as cell}
@@ -1098,6 +1157,37 @@
 		on:filterLessThan={(e) => addFilterFromCell(e.detail.columnId, 'less_than', e.detail.value)}
 		on:close={closeCellContextMenu}
 	/>
+{/if}
+
+<!-- Row Detail Modal -->
+{#if showRowDetail && detailRow}
+	<RowDetailModal
+		isOpen={true}
+		hasPrev={hasPrevRow}
+		hasNext={hasNextRow}
+		on:close={closeRowDetail}
+		on:prev={goToPrevRow}
+		on:next={goToNextRow}
+	>
+		<slot name="row-detail"
+			row={detailRow}
+			close={closeRowDetail}
+			goToPrev={goToPrevRow}
+			goToNext={goToNextRow}
+			hasPrev={hasPrevRow}
+			hasNext={hasNextRow}
+		>
+			<!-- Default fallback: key-value list of all fields -->
+			<dl class="row-detail-default">
+				{#each Object.entries(detailRow) as [key, value]}
+					<div class="row-detail-field">
+						<dt>{key}</dt>
+						<dd>{value ?? '—'}</dd>
+					</div>
+				{/each}
+			</dl>
+		</slot>
+	</RowDetailModal>
 {/if}
 
 <style>
@@ -1734,5 +1824,36 @@
 		background: white;
 		border-top: 1px solid #d1d5db;
 		border-bottom: 1px solid #d1d5db;
+	}
+
+	/* Row Detail Default Fallback */
+	.row-detail-default {
+		margin: 0;
+	}
+
+	.row-detail-field {
+		display: flex;
+		gap: 1rem;
+		padding: 0.5rem 0;
+		border-bottom: 1px solid #f3f4f6;
+	}
+
+	.row-detail-field:last-child {
+		border-bottom: none;
+	}
+
+	.row-detail-field dt {
+		flex-shrink: 0;
+		width: 10rem;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: #6b7280;
+		text-transform: capitalize;
+	}
+
+	.row-detail-field dd {
+		margin: 0;
+		font-size: 0.875rem;
+		color: #111827;
 	}
 </style>

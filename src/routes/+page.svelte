@@ -84,10 +84,9 @@
 		}
 	];
 
-	// Handle row click
+	// Handle row click (fires alongside row detail modal when rowDetail is enabled)
 	function handleRowClick(row: any) {
 		console.log('Row clicked:', row);
-		alert(`Clicked: ${row.organization}`);
 	}
 
 	// Row height control
@@ -142,9 +141,38 @@
 					sorting: true,
 					sortingMode: 'control', // Use Airtable-style sort control
 					pagination: true,
-					filtering: true
+					filtering: true,
+					rowDetail: true
 				}}
-			/>
+			>
+				<div slot="row-detail" let:row>
+					{#if row}
+						<h3 style="margin: 0 0 1rem 0; color: #111827;">{row.organization}</h3>
+						<dl style="margin: 0;">
+							<div style="display: flex; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6;">
+								<dt style="flex-shrink: 0; width: 8rem; font-size: 0.8125rem; font-weight: 500; color: #6b7280;">Type</dt>
+								<dd style="margin: 0; font-size: 0.875rem; color: #111827;">{row.type}</dd>
+							</div>
+							<div style="display: flex; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6;">
+								<dt style="flex-shrink: 0; width: 8rem; font-size: 0.8125rem; font-weight: 500; color: #6b7280;">Date</dt>
+								<dd style="margin: 0; font-size: 0.875rem; color: #111827;">{row.date}</dd>
+							</div>
+							<div style="display: flex; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6;">
+								<dt style="flex-shrink: 0; width: 8rem; font-size: 0.8125rem; font-weight: 500; color: #6b7280;">Description</dt>
+								<dd style="margin: 0; font-size: 0.875rem; color: #111827;">{row.description}</dd>
+							</div>
+							<div style="display: flex; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6;">
+								<dt style="flex-shrink: 0; width: 8rem; font-size: 0.8125rem; font-weight: 500; color: #6b7280;">Fine Amount</dt>
+								<dd style="margin: 0; font-size: 0.875rem; color: #111827;">{row.fine_amount}</dd>
+							</div>
+							<div style="display: flex; gap: 1rem; padding: 0.5rem 0;">
+								<dt style="flex-shrink: 0; width: 8rem; font-size: 0.8125rem; font-weight: 500; color: #6b7280;">Status</dt>
+								<dd style="margin: 0; font-size: 0.875rem; color: #111827;">{row.status}</dd>
+							</div>
+						</dl>
+					{/if}
+				</div>
+			</TableKit>
 		</section>
 
 		<section>

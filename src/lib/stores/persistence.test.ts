@@ -307,11 +307,11 @@ describe('Expanded State Persistence', () => {
 			expect(store[`${storageKey}_expanded`]).toBe(JSON.stringify(true));
 		});
 
-		it('should save false expanded state', async () => {
+		it('should save empty record expanded state (all collapsed)', async () => {
 			const { saveExpanded } = await import('./persistence');
-			saveExpanded(storageKey, false);
+			saveExpanded(storageKey, {});
 
-			expect(store[`${storageKey}_expanded`]).toBe(JSON.stringify(false));
+			expect(store[`${storageKey}_expanded`]).toBe(JSON.stringify({}));
 		});
 
 		it('should save record expanded state', async () => {
@@ -326,9 +326,9 @@ describe('Expanded State Persistence', () => {
 			store[`${storageKey}_expanded`] = JSON.stringify(true);
 
 			const { saveExpanded } = await import('./persistence');
-			saveExpanded(storageKey, false);
+			saveExpanded(storageKey, {});
 
-			expect(store[`${storageKey}_expanded`]).toBe(JSON.stringify(false));
+			expect(store[`${storageKey}_expanded`]).toBe(JSON.stringify({}));
 		});
 	});
 
@@ -338,7 +338,7 @@ describe('Expanded State Persistence', () => {
 
 			const testCases: ExpandedState[] = [
 				true,
-				false,
+				{},
 				{ 'group-0': true },
 				{ 'group-0': true, 'group-1': false, 'group-2': true }
 			];
